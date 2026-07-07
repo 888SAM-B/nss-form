@@ -366,14 +366,40 @@ export default function ReportForm() {
   if (showPreview) {
     return (
       <Box sx={{ bgcolor: '#f5f7fa', minHeight: '100vh', pb: 8 }}>
-      <Box sx={{ background: 'linear-gradient(135deg, #002f6c 0%, #004aad 100%)', color: '#fff', py: 3, px: 3, mb: 4 }}>
-        <Container maxWidth="lg">
-          <Grid container alignItems="center" spacing={2}>
-            <Grid item xs={12} md={2} display="flex" justifyContent={{ xs: 'center', md: 'flex-start' }}>
-              <Box component="img" src="/periyar_logo.png" alt="Periyar University Logo" sx={{ height: 80, objectFit: 'contain', bgcolor: '#fff', p: 0.5, borderRadius: '50%' }} />
-            </Grid>
-            
-            <Grid item xs={12} md={8} sx={{ textAlign: 'center' }}>
+        <Box sx={{ background: 'linear-gradient(135deg, #002f6c 0%, #004aad 100%)', color: '#fff', py: 3, px: 3, mb: 4, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <Container sx={{
+            mx: 'auto',
+            display: 'flex',
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            gap: { xs: 2, sm: 0 },
+            alignItems: 'center',
+            width: '100%',
+            border: '2px solid #fff',
+            p: 2
+          }}>
+            <Box
+              component="img"
+              src="/periyar_logo.png"
+              alt="Periyar University Logo"
+              sx={{
+                height: { xs: 70, sm: 80 },
+                objectFit: 'contain',
+                bgcolor: '#fff',
+                p: 0.5,
+                borderRadius: '50%',
+                marginRight: { xs: 0, sm: '20px' },
+                order: { xs: 1, sm: 1 }
+              }}
+            />
+
+            <Box sx={{
+              width: { xs: '100%', sm: 'auto' },
+              order: { xs: 3, sm: 2 },
+              textAlign: 'center',
+              mt: { xs: 2, sm: 0 }
+            }}>
               <Typography variant="h5" fontWeight="bold" letterSpacing={0.5} gutterBottom>
                 PERIYAR UNIVERSITY
               </Typography>
@@ -386,14 +412,24 @@ export default function ReportForm() {
               <Typography variant="body2" sx={{ opacity: 0.9, fontSize: '0.95rem', fontWeight: 'bold' }}>
                 Review &amp; Verify Your Quarterly Activity Report
               </Typography>
-            </Grid>
-            
-            <Grid item xs={12} md={2} display="flex" justifyContent={{ xs: 'center', md: 'flex-end' }}>
-              <Box component="img" src="/nss_logo.png" alt="NSS Logo" sx={{ height: 80, objectFit: 'contain', bgcolor: '#fff', p: 0.5, borderRadius: '50%' }} />
-            </Grid>
-          </Grid>
-        </Container>
-      </Box>
+            </Box>
+
+            <Box
+              component="img"
+              src="/nss_logo.png"
+              alt="NSS Logo"
+              sx={{
+                height: { xs: 70, sm: 80 },
+                objectFit: 'contain',
+                bgcolor: '#fff',
+                p: 0.5,
+                borderRadius: '50%',
+                marginLeft: { xs: 0, sm: '20px' },
+                order: { xs: 2, sm: 3 }
+              }}
+            />
+          </Container>
+        </Box>
 
         <Container maxWidth="lg">
           <Alert severity="warning" sx={{ mb: 4, fontWeight: 'bold' }}>
@@ -547,32 +583,68 @@ export default function ReportForm() {
   return (
     <Box sx={{ bgcolor: '#f5f7fa', minHeight: '100vh', pb: 8 }}>
       {/* Header Banner */}
-      <Box sx={{ background: 'linear-gradient(135deg, #002f6c 0%, #004aad 100%)', color: '#fff', py: 3, px: 3, mb: 4 }}>
-        <Container maxWidth="lg">
-          <Grid container alignItems="center" spacing={2}>
-            <Grid item xs={12} md={2} display="flex" justifyContent={{ xs: 'center', md: 'flex-start' }}>
-              <Box component="img" src="/periyar_logo.png" alt="Periyar University Logo" sx={{ height: 80, objectFit: 'contain', bgcolor: '#fff', p: 0.5, borderRadius: '50%' }} />
-            </Grid>
-            
-            <Grid item xs={12} md={8} sx={{ textAlign: 'center' }}>
-              <Typography variant="h5" fontWeight="bold" letterSpacing={0.5} gutterBottom>
-                PERIYAR UNIVERSITY
-              </Typography>
-              <Typography variant="caption" display="block" sx={{ opacity: 0.85, fontSize: '0.85rem', fontWeight: 600, mt: -0.5, mb: 0.5 }}>
-                SALEM, TAMIL NADU
-              </Typography>
-              <Typography variant="subtitle1" fontWeight="bold" color="secondary.light" sx={{ textTransform: 'uppercase', letterSpacing: 1, mb: 0.5 }}>
-                National Service Scheme (NSS)
-              </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.9, fontSize: '0.95rem' }}>
-                NSS Quarterly Report Digitization System
-              </Typography>
-            </Grid>
-            
-            <Grid item xs={12} md={2} display="flex" justifyContent={{ xs: 'center', md: 'flex-end' }}>
-              <Box component="img" src="/nss_logo.png" alt="NSS Logo" sx={{ height: 80, objectFit: 'contain', bgcolor: '#fff', p: 0.5, borderRadius: '50%' }} />
-            </Grid>
-          </Grid>
+      <Box sx={{ background: 'linear-gradient(135deg, #002f6c 0%, #004aad 100%)', color: '#fff', py: 3, px: 3, mb: 4, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <Container sx={{
+          mx: 'auto',
+          display: 'flex',
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          justifyContent: 'center',
+          gap: { xs: 2, sm: 0 },
+          alignItems: 'center',
+          width: '100%',
+          p: { xs: 1, sm: 2 }
+        }}>
+          
+          <Box
+            component="img"
+            src="/periyar_logo.png"
+            alt="Periyar University Logo"
+            sx={{
+              height: { xs: 70, sm: 90 },
+              objectFit: 'contain',
+              p: 0.5,
+              borderRadius: '5%',
+              marginRight: { xs: 0, sm: '20px' },
+              order: { xs: 1, sm: 1 }
+            }}
+          />
+
+          <Box sx={{
+            width: { xs: '100%', sm: 'auto' },
+            order: { xs: 3, sm: 2 },
+            textAlign: 'center',
+            mt: { xs: 2, sm: 0 }
+          }}>
+            <Typography variant="h5" fontWeight="bold" letterSpacing={0.5} gutterBottom>
+              PERIYAR UNIVERSITY
+            </Typography>
+            <Typography variant="caption" display="block" sx={{ opacity: 0.85, fontSize: '0.85rem', fontWeight: 600, mt: -0.5, mb: 0.5 }}>
+              SALEM, TAMIL NADU
+            </Typography>
+            <Typography variant="subtitle1" fontWeight="bold" color="secondary.light" sx={{ textTransform: 'uppercase', letterSpacing: 1, mb: 0.5 }}>
+              National Service Scheme (NSS)
+            </Typography>
+            <Typography variant="body2" sx={{ opacity: 0.9, fontSize: '0.95rem' }}>
+              NSS Quarterly Report Digitization System
+            </Typography>
+          </Box>
+
+          <Box
+            component="img"
+            src="/nss_logo.png"
+            alt="NSS Logo"
+            sx={{
+              height: { xs: 65, sm: 80 },
+              objectFit: 'contain',
+              bgcolor: '#fff',
+              p: 0.1,
+              borderRadius: '50%',
+              marginLeft: { xs: 0, sm: '20px' },
+              order: { xs: 2, sm: 3 }
+            }}
+          />
+          
         </Container>
       </Box>
 
