@@ -36,7 +36,15 @@ const ACTIVITIES_META = [
     ]
   },
   {
-    name: 'Voters Awareness',
+    name: 'Voters Awareness SIR',
+    fields: [
+      { key: 'programmeName', label: 'Name of the Programme', type: 'text' },
+      { key: 'volunteersCount', label: 'Number of Volunteers', type: 'number' },
+      { key: 'beneficiariesCount', label: 'No of Beneficiaries', type: 'number' }
+    ]
+  },
+  {
+    name: 'Voters Awareness SVEEP',
     fields: [
       { key: 'programmeName', label: 'Name of the Programme', type: 'text' },
       { key: 'volunteersCount', label: 'Number of Volunteers', type: 'number' },

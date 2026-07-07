@@ -1,5 +1,18 @@
 const pdfMake = require('pdfmake');
 const path = require('path');
+const fs = require('fs');
+
+// Read logos as base64
+const periyarLogoPath = path.join(__dirname, '..', 'assets', 'periyar_logo.png');
+const nssLogoPath = path.join(__dirname, '..', 'assets', 'nss_logo.png');
+
+const periyarLogoDataUrl = fs.existsSync(periyarLogoPath)
+  ? `data:image/png;base64,${fs.readFileSync(periyarLogoPath, 'base64')}`
+  : null;
+
+const nssLogoDataUrl = fs.existsSync(nssLogoPath)
+  ? `data:image/png;base64,${fs.readFileSync(nssLogoPath, 'base64')}`
+  : null;
 
 const fonts = {
   Roboto: {
@@ -30,7 +43,8 @@ function buildActivityTable(name, act) {
 
     case 'Health Camps':
     case 'Anti Drug Camps':
-    case 'Voters Awareness':
+    case 'Voters Awareness SIR':
+    case 'Voters Awareness SVEEP':
     case 'Road Safety':
       headers = ['Name of the Programme', 'Number of Volunteers', 'No of Beneficiaries'];
       values = [act.programmeName || '-', String(act.volunteersCount ?? 0), String(act.beneficiariesCount ?? 0)];
@@ -113,22 +127,47 @@ const generateOfficialPDF = async (report) => {
   const socialMedia = report.socialMedia || {};
 
   // Build content blocks dynamically
+  const logoHeader = {
+    margin: [0, 0, 0, 10],
+    columns: []
+  };
+
+  if (periyarLogoDataUrl) {
+    logoHeader.columns.push({
+      image: periyarLogoDataUrl,
+      width: 45,
+      alignment: 'left'
+    });
+  } else {
+    logoHeader.columns.push({ text: '', width: 45 });
+  }
+
+  logoHeader.columns.push({
+    stack: [
+      { text: 'PERIYAR UNIVERSITY', fontSize: 13, bold: true, color: '#003366', alignment: 'center' },
+      { text: 'SALEM, TAMIL NADU', fontSize: 8, bold: true, color: '#444444', alignment: 'center', margin: [0, 1, 0, 1] },
+      { text: 'NATIONAL SERVICE SCHEME (NSS)', fontSize: 10, bold: true, color: '#f57c00', alignment: 'center' },
+      { text: `NSS QUARTERLY REPORT — ${report.reportingPeriod}`, fontSize: 11, bold: true, color: '#003366', alignment: 'center', margin: [0, 4, 0, 0] }
+    ],
+    width: '*'
+  });
+
+  if (nssLogoDataUrl) {
+    logoHeader.columns.push({
+      image: nssLogoDataUrl,
+      width: 45,
+      alignment: 'right'
+    });
+  } else {
+    logoHeader.columns.push({ text: '', width: 45 });
+  }
+
   const content = [
-    // Report Title
-    {
-      text: 'NSS QUARTERLY REPORT',
-      style: 'reportTitle',
-      alignment: 'center'
-    },
-    {
-      text: `Reporting Period: ${report.reportingPeriod}`,
-      style: 'periodTitle',
-      alignment: 'center',
-      margin: [0, 0, 0, 12]
-    },
+    // Header block with Logos
+    logoHeader,
 
     // Divider
-    { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 2, lineColor: '#003366' }] },
+    { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 1.5, lineColor: '#003366' }] },
 
     // College Info Table
     {
@@ -262,27 +301,49 @@ const generateBulkPDF = async (reports) => {
   reports.forEach((report, rIdx) => {
     const socialMedia = report.socialMedia || {};
 
-    const reportHeading = {
-      text: 'NSS QUARTERLY REPORT',
-      style: 'reportTitle',
-      alignment: 'center'
+    const logoHeader = {
+      margin: [0, 0, 0, 10],
+      columns: []
     };
 
     if (rIdx > 0) {
-      reportHeading.pageBreak = 'before';
+      logoHeader.pageBreak = 'before';
+    }
+
+    if (periyarLogoDataUrl) {
+      logoHeader.columns.push({
+        image: periyarLogoDataUrl,
+        width: 45,
+        alignment: 'left'
+      });
+    } else {
+      logoHeader.columns.push({ text: '', width: 45 });
+    }
+
+    logoHeader.columns.push({
+      stack: [
+        { text: 'PERIYAR UNIVERSITY', fontSize: 13, bold: true, color: '#003366', alignment: 'center' },
+        { text: 'SALEM, TAMIL NADU', fontSize: 8, bold: true, color: '#444444', alignment: 'center', margin: [0, 1, 0, 1] },
+        { text: 'NATIONAL SERVICE SCHEME (NSS)', fontSize: 10, bold: true, color: '#f57c00', alignment: 'center' },
+        { text: `NSS QUARTERLY REPORT — ${report.reportingPeriod}`, fontSize: 11, bold: true, color: '#003366', alignment: 'center', margin: [0, 4, 0, 0] }
+      ],
+      width: '*'
+    });
+
+    if (nssLogoDataUrl) {
+      logoHeader.columns.push({
+        image: nssLogoDataUrl,
+        width: 45,
+        alignment: 'right'
+      });
+    } else {
+      logoHeader.columns.push({ text: '', width: 45 });
     }
 
     content.push(
-      reportHeading,
-      {
-        text: `Reporting Period: ${report.reportingPeriod}`,
-        style: 'periodTitle',
-        alignment: 'center',
-        margin: [0, 0, 0, 12]
-      },
-
+      logoHeader,
       // Divider
-      { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 2, lineColor: '#003366' }] },
+      { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 1.5, lineColor: '#003366' }] },
 
       // College Info Table
       {

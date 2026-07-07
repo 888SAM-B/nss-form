@@ -32,8 +32,8 @@ router.get('/:id', protect, adminOnly, getReportById);
 router.put('/:id', protect, adminOnly, updateReport);
 router.delete('/:id', protect, adminOnly, deleteReport);
 
-// Admin-only: per-report exports
-router.get('/:id/export/pdf', protect, adminOnly, exportOfficialPDF);
-router.get('/:id/export/excel', protect, adminOnly, exportOfficialExcel);
+// Public/Admin: per-report exports (accessible via unguessable report ObjectID)
+router.get('/:id/export/pdf', exportOfficialPDF);
+router.get('/:id/export/excel', exportOfficialExcel);
 
 module.exports = router;

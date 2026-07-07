@@ -6,9 +6,11 @@ import {
   FormControl, InputLabel, Paper, Stack
 } from '@mui/material';
 import {
-  CheckCircle, School, Person, Campaign, Share, Send
+  CheckCircle, School, Person, Campaign, Share, Send,
+  PictureAsPdf, GridOn, ArrowBack
 } from '@mui/icons-material';
 import { toast } from 'react-toastify';
+import { downloadFile } from '../utils/downloadFile';
 
 const ACTIVITIES_META = [
   {
@@ -36,7 +38,15 @@ const ACTIVITIES_META = [
     ]
   },
   {
-    name: 'Voters Awareness',
+    name: 'Voters Awareness SIR',
+    fields: [
+      { key: 'programmeName', label: 'Name of the Programme *', type: 'text' },
+      { key: 'volunteersCount', label: 'Number of Volunteers *', type: 'number' },
+      { key: 'beneficiariesCount', label: 'No of Beneficiaries *', type: 'number' }
+    ]
+  },
+  {
+    name: 'Voters Awareness SVEEP',
     fields: [
       { key: 'programmeName', label: 'Name of the Programme *', type: 'text' },
       { key: 'volunteersCount', label: 'Number of Volunteers *', type: 'number' },
@@ -95,10 +105,10 @@ const ACTIVITIES_META = [
   {
     name: 'Any Other',
     fields: [
-      { key: 'programmesConducted', label: 'Programmes Conducted *', type: 'number' },
-      { key: 'collegeParticipated', label: 'Colleges Participated *', type: 'number' },
-      { key: 'volunteersParticipated', label: 'Volunteers Participated *', type: 'number' },
-      { key: 'beneficiaries', label: 'Beneficiaries *', type: 'number' },
+      { key: 'programmesConducted', label: 'Programmes Conducted', type: 'number' },
+      { key: 'collegeParticipated', label: 'Colleges Participated', type: 'number' },
+      { key: 'volunteersParticipated', label: 'Volunteers Participated', type: 'number' },
+      { key: 'beneficiaries', label: 'Beneficiaries', type: 'number' },
       { key: 'remarks', label: 'Remarks (optional)', type: 'text' }
     ]
   }
@@ -145,6 +155,9 @@ export default function ReportForm() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submissionId, setSubmissionId] = useState('');
+  const [showPreview, setShowPreview] = useState(false);
+  const [reportId, setReportId] = useState('');
+  const [downloading, setDownloading] = useState(null);
 
   const validateHeader = () => {
     const errs = {};
@@ -171,7 +184,7 @@ export default function ReportForm() {
     }));
   };
 
-  const handleSubmit = async () => {
+  const handlePreviewRequest = () => {
     const headerErrs = validateHeader();
     const actErrs = {};
 
@@ -199,14 +212,18 @@ export default function ReportForm() {
 
     if (Object.keys(headerErrs).length > 0 || Object.keys(actErrs).length > 0) {
       setErrors({ ...headerErrs, activities: actErrs });
-      toast.error('Please fix the highlighted errors before submitting');
+      toast.error('Please fix the highlighted errors before proceeding');
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
     setErrors({});
-    setSubmitting(true);
+    setShowPreview(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
+  const handleFinalSubmit = async () => {
+    setSubmitting(true);
     try {
       const payload = {
         universityName: 'N/A', // kept inside payload for backend safety or defaulted
@@ -227,14 +244,49 @@ export default function ReportForm() {
       };
 
       const res = await axios.post('/api/reports', payload);
+      const newReportId = res.data.reportId;
       setSubmissionId(res.data.submissionId);
+      setReportId(newReportId);
       setSubmitted(true);
+      setShowPreview(false);
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      toast.success('Report submitted successfully!');
+
+      // Automatically trigger report PDF download
+      try {
+        const safeName = (header.collegeName || 'report').replace(/[^a-zA-Z0-9]/g, '_');
+        const safePeriod = (header.reportingPeriod || '').replace(/[^a-zA-Z0-9]/g, '_');
+        await downloadFile(
+          `/api/reports/${newReportId}/export/pdf`,
+          `NSS_Report_${safeName}_${safePeriod}.pdf`
+        );
+      } catch (dlErr) {
+        console.error('Auto download failed:', dlErr);
+      }
+
     } catch (err) {
       const msg = err.response?.data?.message || 'Submission failed. Please try again.';
       toast.error(msg);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleDownload = async (type) => {
+    if (!reportId) return;
+    setDownloading(type);
+    try {
+      const safeName = (header.collegeName || 'report').replace(/[^a-zA-Z0-9]/g, '_');
+      const safePeriod = (header.reportingPeriod || '').replace(/[^a-zA-Z0-9]/g, '_');
+      const ext = type === 'pdf' ? 'pdf' : 'xlsx';
+      await downloadFile(
+        `/api/reports/${reportId}/export/${type}`,
+        `NSS_Report_${safeName}_${safePeriod}.${ext}`
+      );
+    } catch (err) {
+      toast.error(err.message || 'Download failed');
+    } finally {
+      setDownloading(null);
     }
   };
 
@@ -244,12 +296,14 @@ export default function ReportForm() {
     setActivities(initActivities());
     setSocialMedia({ instagram: '', facebook: '', youtube: '', x: '', other: '' });
     setErrors({});
+    setReportId('');
+    setShowPreview(false);
   };
 
   if (submitted) {
     return (
       <Box sx={{ minHeight: '100vh', background: 'linear-gradient(135deg, #002f6c 0%, #004aad 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', p: 3 }}>
-        <Card sx={{ maxWidth: 520, width: '100%', textAlign: 'center', borderRadius: 4, p: 2 }}>
+        <Card sx={{ maxWidth: 550, width: '100%', textAlign: 'center', borderRadius: 4, p: 2 }}>
           <CardContent sx={{ py: 5 }}>
             <CheckCircle sx={{ fontSize: 80, color: 'success.main', mb: 2 }} />
             <Typography variant="h4" fontWeight="bold" color="success.main" gutterBottom>
@@ -258,7 +312,7 @@ export default function ReportForm() {
             <Typography variant="body1" color="text.secondary" mb={3}>
               Your NSS Quarterly Report has been submitted successfully.
             </Typography>
-            <Paper elevation={3} sx={{ p: 2.5, bgcolor: '#f0f7ff', borderRadius: 2, mb: 3, display: 'inline-block', minWidth: 280 }}>
+            <Paper elevation={3} sx={{ p: 2.5, bgcolor: '#f0f7ff', borderRadius: 2, mb: 3.5, display: 'inline-block', minWidth: 280 }}>
               <Typography variant="caption" color="text.secondary" display="block" mb={0.5}>
                 YOUR SUBMISSION ID
               </Typography>
@@ -269,6 +323,35 @@ export default function ReportForm() {
                 Please save this ID for your records
               </Typography>
             </Paper>
+
+            <Box sx={{ mb: 4, p: 2.5, border: '1px dashed #4caf50', borderRadius: 2, bgcolor: '#f1fcf1' }}>
+              <Typography variant="subtitle2" fontWeight="bold" color="success.dark" mb={1.5}>
+                📄 Download Submitted Report
+              </Typography>
+              <Stack direction="row" spacing={2} justifyContent="center">
+                <Button
+                  variant="contained"
+                  color="error"
+                  startIcon={downloading === 'pdf' ? <CircularProgress size={16} color="inherit" /> : <PictureAsPdf />}
+                  disabled={!!downloading}
+                  onClick={() => handleDownload('pdf')}
+                  sx={{ px: 3 }}
+                >
+                  PDF
+                </Button>
+                <Button
+                  variant="contained"
+                  color="success"
+                  startIcon={downloading === 'excel' ? <CircularProgress size={16} color="inherit" /> : <GridOn />}
+                  disabled={!!downloading}
+                  onClick={() => handleDownload('excel')}
+                  sx={{ px: 3 }}
+                >
+                  Excel
+                </Button>
+              </Stack>
+            </Box>
+
             <Box>
               <Button variant="outlined" onClick={handleReset}>
                 Submit Another Report
@@ -280,16 +363,217 @@ export default function ReportForm() {
     );
   }
 
+  if (showPreview) {
+    return (
+      <Box sx={{ bgcolor: '#f5f7fa', minHeight: '100vh', pb: 8 }}>
+      <Box sx={{ background: 'linear-gradient(135deg, #002f6c 0%, #004aad 100%)', color: '#fff', py: 3, px: 3, mb: 4 }}>
+        <Container maxWidth="lg">
+          <Grid container alignItems="center" spacing={2}>
+            <Grid item xs={12} md={2} display="flex" justifyContent={{ xs: 'center', md: 'flex-start' }}>
+              <Box component="img" src="/periyar_logo.png" alt="Periyar University Logo" sx={{ height: 80, objectFit: 'contain', bgcolor: '#fff', p: 0.5, borderRadius: '50%' }} />
+            </Grid>
+            
+            <Grid item xs={12} md={8} sx={{ textAlign: 'center' }}>
+              <Typography variant="h5" fontWeight="bold" letterSpacing={0.5} gutterBottom>
+                PERIYAR UNIVERSITY
+              </Typography>
+              <Typography variant="caption" display="block" sx={{ opacity: 0.85, fontSize: '0.85rem', fontWeight: 600, mt: -0.5, mb: 0.5 }}>
+                SALEM, TAMIL NADU
+              </Typography>
+              <Typography variant="subtitle1" fontWeight="bold" color="secondary.light" sx={{ textTransform: 'uppercase', letterSpacing: 1, mb: 0.5 }}>
+                National Service Scheme (NSS)
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.9, fontSize: '0.95rem', fontWeight: 'bold' }}>
+                Review &amp; Verify Your Quarterly Activity Report
+              </Typography>
+            </Grid>
+            
+            <Grid item xs={12} md={2} display="flex" justifyContent={{ xs: 'center', md: 'flex-end' }}>
+              <Box component="img" src="/nss_logo.png" alt="NSS Logo" sx={{ height: 80, objectFit: 'contain', bgcolor: '#fff', p: 0.5, borderRadius: '50%' }} />
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
+
+        <Container maxWidth="lg">
+          <Alert severity="warning" sx={{ mb: 4, fontWeight: 'bold' }}>
+            This is a preview. Scroll to the bottom and click "Confirm & Submit" to finalize your report.
+          </Alert>
+
+          {/* Basic Info Preview */}
+          <Card sx={{ mb: 3, borderRadius: 2, boxShadow: 2 }}>
+            <CardContent sx={{ p: 3 }}>
+              <Box display="flex" alignItems="center" gap={1} mb={2.5}>
+                <School color="primary" />
+                <Typography variant="h6" fontWeight="bold" color="primary">Basic Information</Typography>
+              </Box>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={4}>
+                  <Typography variant="caption" color="text.secondary" display="block">Reporting Period</Typography>
+                  <Typography variant="body1" fontWeight="bold">{header.reportingPeriod}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Typography variant="caption" color="text.secondary" display="block">College Name</Typography>
+                  <Typography variant="body1" fontWeight="bold">{header.collegeName}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Typography variant="caption" color="text.secondary" display="block">District</Typography>
+                  <Typography variant="body1" fontWeight="bold">{header.district}</Typography>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+
+          {/* Programme Officer Preview */}
+          <Card sx={{ mb: 3, borderRadius: 2, boxShadow: 2 }}>
+            <CardContent sx={{ p: 3 }}>
+              <Box display="flex" alignItems="center" gap={1} mb={2.5}>
+                <Person color="primary" />
+                <Typography variant="h6" fontWeight="bold" color="primary">Programme Officer Details</Typography>
+              </Box>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={4}>
+                  <Typography variant="caption" color="text.secondary" display="block">Name</Typography>
+                  <Typography variant="body1" fontWeight="bold">{header.programmeOfficerName}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Typography variant="caption" color="text.secondary" display="block">Mobile Number</Typography>
+                  <Typography variant="body1" fontWeight="bold">{header.programmeOfficerMobile}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Typography variant="caption" color="text.secondary" display="block">Email Address</Typography>
+                  <Typography variant="body1" fontWeight="bold">{header.programmeOfficerEmail}</Typography>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+
+          {/* Activities Preview */}
+          <Card sx={{ mb: 3, borderRadius: 2, boxShadow: 2 }}>
+            <CardContent sx={{ p: 3 }}>
+              <Box display="flex" alignItems="center" gap={1} mb={3}>
+                <Campaign color="primary" />
+                <Typography variant="h6" fontWeight="bold" color="primary">Activity-wise Performance</Typography>
+              </Box>
+
+              <Stack spacing={2.5}>
+                {ACTIVITIES_META.map((act, idx) => {
+                  const state = activities[act.name];
+                  return (
+                    <Paper key={act.name} variant="outlined" sx={{ p: 2.5, borderRadius: 2, bgcolor: idx % 2 === 0 ? '#fafbff' : '#fff' }}>
+                      <Typography variant="subtitle1" fontWeight="bold" color="primary.dark" sx={{ mb: 1.5 }}>
+                        {idx + 1}. {act.name}
+                      </Typography>
+                      <Grid container spacing={2}>
+                        {act.fields.map(f => {
+                          const val = state[f.key];
+                          return (
+                            <Grid item xs={12} sm={act.fields.length > 3 ? 3 : 4} key={f.key}>
+                              <Typography variant="caption" color="text.secondary" display="block">
+                                {f.label.replace(' *', '').replace(' (optional)', '')}
+                              </Typography>
+                              <Typography variant="body2" fontWeight={600}>
+                                {val === '' || val === undefined || val === null ? '—' : val}
+                              </Typography>
+                            </Grid>
+                          );
+                        })}
+                      </Grid>
+                    </Paper>
+                  );
+                })}
+              </Stack>
+            </CardContent>
+          </Card>
+
+          {/* Social Media Preview */}
+          <Card sx={{ mb: 4, borderRadius: 2, boxShadow: 2 }}>
+            <CardContent sx={{ p: 3 }}>
+              <Box display="flex" alignItems="center" gap={1} mb={2.5}>
+                <Share color="primary" />
+                <Typography variant="h6" fontWeight="bold" color="primary">Social Media Presence</Typography>
+              </Box>
+              <Grid container spacing={2}>
+                {[
+                  { key: 'instagram', label: 'Instagram' },
+                  { key: 'facebook', label: 'Facebook' },
+                  { key: 'youtube', label: 'YouTube' },
+                  { key: 'x', label: 'X (Twitter)' },
+                  { key: 'other', label: 'Other Social' }
+                ].map(({ key, label }) => (
+                  <Grid item xs={12} sm={4} key={key}>
+                    <Typography variant="caption" color="text.secondary" display="block">{label}</Typography>
+                    <Typography variant="body2" fontWeight={600}>{socialMedia[key] || '—'}</Typography>
+                  </Grid>
+                ))}
+              </Grid>
+            </CardContent>
+          </Card>
+
+          {/* Actions */}
+          <Box display="flex" justifyContent="center" gap={3}>
+            <Button
+              variant="outlined"
+              size="large"
+              onClick={() => {
+                setShowPreview(false);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              startIcon={<ArrowBack />}
+              sx={{ px: 4, py: 1.5, fontWeight: 'bold' }}
+            >
+              Back to Edit
+            </Button>
+            <Button
+              variant="contained"
+              size="large"
+              disabled={submitting}
+              onClick={handleFinalSubmit}
+              startIcon={submitting ? <CircularProgress size={20} color="inherit" /> : <Send />}
+              sx={{
+                px: 5, py: 1.5, fontWeight: 'bold',
+                background: 'linear-gradient(135deg, #2e7d32, #4caf50)',
+                '&:hover': { background: 'linear-gradient(135deg, #1b5e20, #388e3c)' }
+              }}
+            >
+              {submitting ? 'Submitting...' : 'Confirm & Submit'}
+            </Button>
+          </Box>
+        </Container>
+      </Box>
+    );
+  }
+
   return (
     <Box sx={{ bgcolor: '#f5f7fa', minHeight: '100vh', pb: 8 }}>
       {/* Header Banner */}
-      <Box sx={{ background: 'linear-gradient(135deg, #002f6c 0%, #004aad 100%)', color: '#fff', py: 4, px: 2, textAlign: 'center', mb: 4 }}>
-        <Typography variant="h4" fontWeight="bold" gutterBottom>
-          NSS Quarterly Report Digitization System
-        </Typography>
-        <Typography variant="body1" sx={{ opacity: 0.85 }}>
-          Fill in the form below to submit your quarterly NSS activity report
-        </Typography>
+      <Box sx={{ background: 'linear-gradient(135deg, #002f6c 0%, #004aad 100%)', color: '#fff', py: 3, px: 3, mb: 4 }}>
+        <Container maxWidth="lg">
+          <Grid container alignItems="center" spacing={2}>
+            <Grid item xs={12} md={2} display="flex" justifyContent={{ xs: 'center', md: 'flex-start' }}>
+              <Box component="img" src="/periyar_logo.png" alt="Periyar University Logo" sx={{ height: 80, objectFit: 'contain', bgcolor: '#fff', p: 0.5, borderRadius: '50%' }} />
+            </Grid>
+            
+            <Grid item xs={12} md={8} sx={{ textAlign: 'center' }}>
+              <Typography variant="h5" fontWeight="bold" letterSpacing={0.5} gutterBottom>
+                PERIYAR UNIVERSITY
+              </Typography>
+              <Typography variant="caption" display="block" sx={{ opacity: 0.85, fontSize: '0.85rem', fontWeight: 600, mt: -0.5, mb: 0.5 }}>
+                SALEM, TAMIL NADU
+              </Typography>
+              <Typography variant="subtitle1" fontWeight="bold" color="secondary.light" sx={{ textTransform: 'uppercase', letterSpacing: 1, mb: 0.5 }}>
+                National Service Scheme (NSS)
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.9, fontSize: '0.95rem' }}>
+                NSS Quarterly Report Digitization System
+              </Typography>
+            </Grid>
+            
+            <Grid item xs={12} md={2} display="flex" justifyContent={{ xs: 'center', md: 'flex-end' }}>
+              <Box component="img" src="/nss_logo.png" alt="NSS Logo" sx={{ height: 80, objectFit: 'contain', bgcolor: '#fff', p: 0.5, borderRadius: '50%' }} />
+            </Grid>
+          </Grid>
+        </Container>
       </Box>
 
       <Container maxWidth="lg">
@@ -413,12 +697,12 @@ export default function ReportForm() {
                     <Typography variant="subtitle1" fontWeight="bold" color="primary.dark" sx={{ mb: 2 }}>
                       {idx + 1}. {act.name}
                     </Typography>
-                    
+
                     <Grid container spacing={2}>
                       {act.fields.map(f => {
                         const isNum = f.type === 'number';
                         const errText = errors.activities?.[act.name]?.[f.key] || '';
-                        
+
                         return (
                           <Grid item xs={12} sm={act.fields.length > 3 ? 3 : 4} key={f.key}>
                             <TextField
@@ -478,7 +762,11 @@ export default function ReportForm() {
             </Grid>
           </CardContent>
         </Card>
-
+        <center>
+          <Typography display="block" color="text.secondary" mt={1.5}>
+            Kindly review all information before submitting.
+          </Typography>
+        </center>
         {/* Submit */}
         <Box textAlign="center">
           {Object.keys(errors).length > 0 && (
@@ -486,24 +774,22 @@ export default function ReportForm() {
               Please correct the errors above before submitting.
             </Alert>
           )}
+
           <Button
             id="submit-report-btn"
             variant="contained"
             size="large"
-            onClick={handleSubmit}
-            disabled={submitting}
-            startIcon={submitting ? <CircularProgress size={20} color="inherit" /> : <Send />}
+            onClick={handlePreviewRequest}
+            startIcon={<Send />}
             sx={{
               px: 6, py: 1.6, fontSize: '1.1rem', fontWeight: 'bold',
               background: 'linear-gradient(135deg, #002f6c, #0061d5)',
               '&:hover': { background: 'linear-gradient(135deg, #001f4e, #004aad)' }
             }}
           >
-            {submitting ? 'Submitting...' : 'Submit Report'}
+            Review &amp; Submit
           </Button>
-          <Typography variant="caption" display="block" color="text.secondary" mt={1.5}>
-            Please review all information before submitting.
-          </Typography>
+
         </Box>
       </Container>
     </Box>
