@@ -273,14 +273,14 @@ export default function ReportDetailDialog({ reportId, open, onClose, onUpdated 
                         onChange={e => setEditData(p => ({ ...p, reportingPeriod: e.target.value }))} />
                     </Grid>
                     <Grid item xs={12} sm={6}>
-                      <TextField label="Programme Officer Name" fullWidth size="small"
-                        value={editData.programmeOfficerName}
-                        onChange={e => setEditData(p => ({ ...p, programmeOfficerName: e.target.value }))} />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
                       <TextField label="District" fullWidth size="small"
                         value={editData.district}
                         onChange={e => setEditData(p => ({ ...p, district: e.target.value }))} />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField label="Programme Officer Name" fullWidth size="small"
+                        value={editData.programmeOfficerName}
+                        onChange={e => setEditData(p => ({ ...p, programmeOfficerName: e.target.value }))} />
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <TextField label="Mobile" fullWidth size="small"

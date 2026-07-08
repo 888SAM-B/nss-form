@@ -658,7 +658,7 @@ export default function ReportForm() {
               <Typography variant="h6" fontWeight="bold" color="primary">Basic Information</Typography>
             </Box>
             <Grid container spacing={2.5}>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={4}>
                 <TextField
                   id="reportingPeriod"
                   label="Reporting Period"
@@ -671,7 +671,7 @@ export default function ReportForm() {
                   helperText="Fixed by administrator"
                 />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={4}>
                 <TextField
                   id="collegeName"
                   label="College Name *"
@@ -680,6 +680,17 @@ export default function ReportForm() {
                   onChange={e => setHeader({ ...header, collegeName: e.target.value })}
                   error={!!errors.collegeName}
                   helperText={errors.collegeName}
+                />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  id="district"
+                  label="District *"
+                  fullWidth
+                  value={header.district}
+                  onChange={e => setHeader({ ...header, district: e.target.value })}
+                  error={!!errors.district}
+                  helperText={errors.district}
                 />
               </Grid>
             </Grid>
@@ -694,7 +705,7 @@ export default function ReportForm() {
               <Typography variant="h6" fontWeight="bold" color="primary">Programme Officer Details</Typography>
             </Box>
             <Grid container spacing={2.5}>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={4}>
                 <TextField
                   id="programmeOfficerName"
                   label="Programme Officer Name *"
@@ -705,18 +716,7 @@ export default function ReportForm() {
                   helperText={errors.programmeOfficerName}
                 />
               </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  id="district"
-                  label="District *"
-                  fullWidth
-                  value={header.district}
-                  onChange={e => setHeader({ ...header, district: e.target.value })}
-                  error={!!errors.district}
-                  helperText={errors.district}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={4}>
                 <TextField
                   id="programmeOfficerMobile"
                   label="Mobile Number *"
@@ -729,7 +729,7 @@ export default function ReportForm() {
                   placeholder="10-digit mobile number"
                 />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={4}>
                 <TextField
                   id="programmeOfficerEmail"
                   label="Email Address *"
