@@ -14,7 +14,7 @@ const ACTIVITIES_META = [
   {
     name: 'Blood Donation Camps',
     fields: [
-      { key: 'programmeName', label: 'Name of the Programme', type: 'text' },
+      { key: 'programmeName', label: 'No of Programmes Conducted', type: 'text' },
       { key: 'volunteersCount', label: 'Number of Volunteers', type: 'number' },
       { key: 'bloodUnitsDonated', label: 'Units Donated', type: 'number' }
     ]
@@ -22,7 +22,7 @@ const ACTIVITIES_META = [
   {
     name: 'Health Camps',
     fields: [
-      { key: 'programmeName', label: 'Name of the Programme', type: 'text' },
+      { key: 'programmeName', label: 'No of Programmes Conducted', type: 'text' },
       { key: 'volunteersCount', label: 'Number of Volunteers', type: 'number' },
       { key: 'beneficiariesCount', label: 'No of Beneficiaries', type: 'number' }
     ]
@@ -30,7 +30,7 @@ const ACTIVITIES_META = [
   {
     name: 'Anti Drug Camps',
     fields: [
-      { key: 'programmeName', label: 'Name of the Programme', type: 'text' },
+      { key: 'programmeName', label: 'No of Programmes Conducted', type: 'text' },
       { key: 'volunteersCount', label: 'Number of Volunteers', type: 'number' },
       { key: 'beneficiariesCount', label: 'No of Beneficiaries', type: 'number' }
     ]
@@ -38,7 +38,7 @@ const ACTIVITIES_META = [
   {
     name: 'Voters Awareness SIR',
     fields: [
-      { key: 'programmeName', label: 'Name of the Programme', type: 'text' },
+      { key: 'programmeName', label: 'No of Programmes Conducted', type: 'text' },
       { key: 'volunteersCount', label: 'Number of Volunteers', type: 'number' },
       { key: 'beneficiariesCount', label: 'No of Beneficiaries', type: 'number' }
     ]
@@ -46,7 +46,7 @@ const ACTIVITIES_META = [
   {
     name: 'Voters Awareness SVEEP',
     fields: [
-      { key: 'programmeName', label: 'Name of the Programme', type: 'text' },
+      { key: 'programmeName', label: 'No of Programmes Conducted', type: 'text' },
       { key: 'volunteersCount', label: 'Number of Volunteers', type: 'number' },
       { key: 'beneficiariesCount', label: 'No of Beneficiaries', type: 'number' }
     ]
@@ -54,7 +54,7 @@ const ACTIVITIES_META = [
   {
     name: 'Road Safety',
     fields: [
-      { key: 'programmeName', label: 'Name of the Programme', type: 'text' },
+      { key: 'programmeName', label: 'No of Programmes Conducted', type: 'text' },
       { key: 'volunteersCount', label: 'Number of Volunteers', type: 'number' },
       { key: 'beneficiariesCount', label: 'No of Beneficiaries', type: 'number' }
     ]
@@ -62,7 +62,7 @@ const ACTIVITIES_META = [
   {
     name: 'Tree Plantation',
     fields: [
-      { key: 'programmeName', label: 'Name of the Programme', type: 'text' },
+      { key: 'programmeName', label: 'No of Programmes Conducted', type: 'text' },
       { key: 'volunteersCount', label: 'Number of Volunteers', type: 'number' },
       { key: 'saplingsPlanted', label: 'No of Saplings Planted', type: 'number' }
     ]
@@ -70,7 +70,7 @@ const ACTIVITIES_META = [
   {
     name: 'Important Days & Events',
     fields: [
-      { key: 'programmeName', label: 'Name of the Programme', type: 'text' },
+      { key: 'programmeName', label: 'No of Programmes Conducted', type: 'text' },
       { key: 'eventDate', label: 'Date', type: 'text' },
       { key: 'volunteersCount', label: 'Number of Volunteers Present', type: 'number' }
     ]
@@ -78,14 +78,14 @@ const ACTIVITIES_META = [
   {
     name: 'Pledge',
     fields: [
-      { key: 'programmeName', label: 'Name of the Programme', type: 'text' },
+      { key: 'programmeName', label: 'No of Programmes Conducted', type: 'text' },
       { key: 'volunteersCount', label: 'Number of Volunteers', type: 'number' }
     ]
   },
   {
     name: 'Rallies',
     fields: [
-      { key: 'programmeName', label: 'Name of the Programme', type: 'text' },
+      { key: 'programmeName', label: 'No of Programmes Conducted', type: 'text' },
       { key: 'volunteersCount', label: 'Number of Volunteers', type: 'number' },
       { key: 'eventDate', label: 'Date', type: 'text' },
       { key: 'distanceKm', label: 'Distance in KM', type: 'number' }
@@ -94,7 +94,7 @@ const ACTIVITIES_META = [
   {
     name: 'Hosted Meetings',
     fields: [
-      { key: 'programmeName', label: 'Name of the Programme', type: 'text' },
+      { key: 'programmeName', label: 'No of Programmes Conducted', type: 'text' },
       { key: 'guestName', label: 'Name of Guest (if any)', type: 'text' },
       { key: 'volunteersCount', label: 'Number of Volunteers', type: 'number' },
       { key: 'beneficiariesCount', label: 'No of Beneficiaries', type: 'number' }

@@ -1,17 +1,17 @@
 const ExcelJS = require('exceljs');
 
 const RAW_ACTIVITY_FIELDS = [
-  { name: 'Blood Donation Camps', keys: ['programmeName', 'volunteersCount', 'bloodUnitsDonated'], labels: ['Name of the Programme', 'Number of Volunteers', 'No of Units of Blood Donated'] },
-  { name: 'Health Camps', keys: ['programmeName', 'volunteersCount', 'beneficiariesCount'], labels: ['Name of the Programme', 'Number of Volunteers', 'No of Beneficiaries'] },
-  { name: 'Anti Drug Camps', keys: ['programmeName', 'volunteersCount', 'beneficiariesCount'], labels: ['Name of the Programme', 'Number of Volunteers', 'No of Beneficiaries'] },
-  { name: 'Voters Awareness SIR', keys: ['programmeName', 'volunteersCount', 'beneficiariesCount'], labels: ['Name of the Programme', 'Number of Volunteers', 'No of Beneficiaries'] },
-  { name: 'Voters Awareness SVEEP', keys: ['programmeName', 'volunteersCount', 'beneficiariesCount'], labels: ['Name of the Programme', 'Number of Volunteers', 'No of Beneficiaries'] },
-  { name: 'Road Safety', keys: ['programmeName', 'volunteersCount', 'beneficiariesCount'], labels: ['Name of the Programme', 'Number of Volunteers', 'No of Beneficiaries'] },
-  { name: 'Tree Plantation', keys: ['programmeName', 'volunteersCount', 'saplingsPlanted'], labels: ['Name of the Programme', 'Number of Volunteers', 'No of Saplings Planted'] },
-  { name: 'Important Days & Events', keys: ['programmeName', 'eventDate', 'volunteersCount'], labels: ['Name of the Programme', 'Date', 'Number of Volunteers Present'] },
-  { name: 'Pledge', keys: ['programmeName', 'volunteersCount'], labels: ['Name of the Programme', 'Number of Volunteers'] },
-  { name: 'Rallies', keys: ['programmeName', 'volunteersCount', 'eventDate', 'distanceKm'], labels: ['Name of the Programme', 'Number of Volunteers', 'Date', 'Distance in KM'] },
-  { name: 'Hosted Meetings', keys: ['programmeName', 'guestName', 'volunteersCount', 'beneficiariesCount'], labels: ['Name of the Programme', 'Name of Guest (if any)', 'Number of Volunteers', 'No of Beneficiaries'] },
+  { name: 'Blood Donation Camps', keys: ['programmeName', 'volunteersCount', 'bloodUnitsDonated'], labels: ['No of Programmes Conducted', 'Number of Volunteers', 'No of Units of Blood Donated'] },
+  { name: 'Health Camps', keys: ['programmeName', 'volunteersCount', 'beneficiariesCount'], labels: ['No of Programmes Conducted', 'Number of Volunteers', 'No of Beneficiaries'] },
+  { name: 'Anti Drug Camps', keys: ['programmeName', 'volunteersCount', 'beneficiariesCount'], labels: ['No of Programmes Conducted', 'Number of Volunteers', 'No of Beneficiaries'] },
+  { name: 'Voters Awareness SIR', keys: ['programmeName', 'volunteersCount', 'beneficiariesCount'], labels: ['No of Programmes Conducted', 'Number of Volunteers', 'No of Beneficiaries'] },
+  { name: 'Voters Awareness SVEEP', keys: ['programmeName', 'volunteersCount', 'beneficiariesCount'], labels: ['No of Programmes Conducted', 'Number of Volunteers', 'No of Beneficiaries'] },
+  { name: 'Road Safety', keys: ['programmeName', 'volunteersCount', 'beneficiariesCount'], labels: ['No of Programmes Conducted', 'Number of Volunteers', 'No of Beneficiaries'] },
+  { name: 'Tree Plantation', keys: ['programmeName', 'volunteersCount', 'saplingsPlanted'], labels: ['No of Programmes Conducted', 'Number of Volunteers', 'No of Saplings Planted'] },
+  { name: 'Important Days & Events', keys: ['programmeName', 'eventDate', 'volunteersCount'], labels: ['No of Programmes Conducted', 'Date', 'Number of Volunteers Present'] },
+  { name: 'Pledge', keys: ['programmeName', 'volunteersCount'], labels: ['No of Programmes Conducted', 'Number of Volunteers'] },
+  { name: 'Rallies', keys: ['programmeName', 'volunteersCount', 'eventDate', 'distanceKm'], labels: ['No of Programmes Conducted', 'Number of Volunteers', 'Date', 'Distance in KM'] },
+  { name: 'Hosted Meetings', keys: ['programmeName', 'guestName', 'volunteersCount', 'beneficiariesCount'], labels: ['No of Programmes Conducted', 'Name of Guest (if any)', 'Number of Volunteers', 'No of Beneficiaries'] },
   { name: 'Any Other', keys: ['programmesConducted', 'collegeParticipated', 'volunteersParticipated', 'beneficiaries', 'remarks'], labels: ['Programmes Conducted', 'Colleges Participated', 'Volunteers Participated', 'Beneficiaries', 'Remarks'] }
 ];
 

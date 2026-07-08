@@ -36,7 +36,7 @@ function buildActivityTable(name, act) {
 
   switch (name) {
     case 'Blood Donation Camps':
-      headers = ['Name of the Programme', 'Number of Volunteers', 'No of Units of Blood Donated'];
+      headers = ['No of Programmes Conducted', 'Number of Volunteers', 'No of Units of Blood Donated'];
       values = [act.programmeName || '-', String(act.volunteersCount ?? 0), String(act.bloodUnitsDonated ?? 0)];
       widths = ['*', 120, 150];
       break;
@@ -46,37 +46,37 @@ function buildActivityTable(name, act) {
     case 'Voters Awareness SIR':
     case 'Voters Awareness SVEEP':
     case 'Road Safety':
-      headers = ['Name of the Programme', 'Number of Volunteers', 'No of Beneficiaries'];
+      headers = ['No of Programmes Conducted', 'Number of Volunteers', 'No of Beneficiaries'];
       values = [act.programmeName || '-', String(act.volunteersCount ?? 0), String(act.beneficiariesCount ?? 0)];
       widths = ['*', 120, 120];
       break;
 
     case 'Tree Plantation':
-      headers = ['Name of the Programme', 'Number of Volunteers', 'No of Saplings Planted'];
+      headers = ['No of Programmes Conducted', 'Number of Volunteers', 'No of Saplings Planted'];
       values = [act.programmeName || '-', String(act.volunteersCount ?? 0), String(act.saplingsPlanted ?? 0)];
       widths = ['*', 120, 130];
       break;
 
     case 'Important Days & Events':
-      headers = ['Name of the Programme', 'Date', 'Number of Volunteers Present'];
+      headers = ['No of Programmes Conducted', 'Date', 'Number of Volunteers Present'];
       values = [act.programmeName || '-', act.eventDate || '-', String(act.volunteersCount ?? 0)];
       widths = ['*', 100, 150];
       break;
 
     case 'Pledge':
-      headers = ['Name of the Programme', 'Number of Volunteers'];
+      headers = ['No of Programmes Conducted', 'Number of Volunteers'];
       values = [act.programmeName || '-', String(act.volunteersCount ?? 0)];
       widths = ['*', 150];
       break;
 
     case 'Rallies':
-      headers = ['Name of the Programme', 'Number of Volunteers', 'Date', 'Distance in KM'];
+      headers = ['No of Programmes Conducted', 'Number of Volunteers', 'Date', 'Distance in KM'];
       values = [act.programmeName || '-', String(act.volunteersCount ?? 0), act.eventDate || '-', String(act.distanceKm ?? 0)];
       widths = ['*', 110, 80, 90];
       break;
 
     case 'Hosted Meetings':
-      headers = ['Name of the Programme', 'Name of Guest (if any)', 'Number of Volunteers', 'No of Beneficiaries'];
+      headers = ['No of Programmes Conducted', 'Name of Guest (if any)', 'Number of Volunteers', 'No of Beneficiaries'];
       values = [act.programmeName || '-', act.guestName || '-', String(act.volunteersCount ?? 0), String(act.beneficiariesCount ?? 0)];
       widths = ['*', '*', 110, 110];
       break;
