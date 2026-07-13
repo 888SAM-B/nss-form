@@ -3,11 +3,12 @@ import axios from 'axios';
 import {
   Box, Container, Typography, TextField, Button, Card, CardContent,
   Grid, CircularProgress, Alert, MenuItem, Select,
-  FormControl, InputLabel, Paper, Stack
+  FormControl, InputLabel, Paper, Stack, Dialog, DialogTitle,
+  DialogContent, DialogActions, IconButton
 } from '@mui/material';
 import {
   CheckCircle, School, Person, Campaign, Share, Send,
-  PictureAsPdf, GridOn, ArrowBack
+  PictureAsPdf, GridOn, ArrowBack, Close
 } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 import { downloadFile } from '../utils/downloadFile';
@@ -363,222 +364,7 @@ export default function ReportForm() {
     );
   }
 
-  if (showPreview) {
-    return (
-      <Box sx={{ bgcolor: '#f5f7fa', minHeight: '100vh', pb: 8 }}>
-        <Box sx={{ background: 'linear-gradient(135deg, #002f6c 0%, #004aad 100%)', color: '#fff', py: 3, px: 3, mb: 4, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <Container sx={{
-            mx: 'auto',
-            display: 'flex',
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            justifyContent: 'center',
-            gap: { xs: 2, sm: 0 },
-            alignItems: 'center',
-            width: '100%',
-            border: '2px solid #fff',
-            p: 2
-          }}>
-            <Box
-              component="img"
-              src="/periyar_logo.png"
-              alt="Periyar University Logo"
-              sx={{
-                height: { xs: 70, sm: 80 },
-                objectFit: 'contain',
-                bgcolor: '#fff',
-                p: 0.5,
-                borderRadius: '50%',
-                marginRight: { xs: 0, sm: '20px' },
-                order: { xs: 1, sm: 1 }
-              }}
-            />
 
-            <Box sx={{
-              width: { xs: '100%', sm: 'auto' },
-              order: { xs: 3, sm: 2 },
-              textAlign: 'center',
-              mt: { xs: 2, sm: 0 }
-            }}>
-              <Typography variant="h5" fontWeight="bold" letterSpacing={0.5} gutterBottom>
-                PERIYAR UNIVERSITY
-              </Typography>
-              <Typography variant="caption" display="block" sx={{ opacity: 0.85, fontSize: '0.85rem', fontWeight: 600, mt: -0.5, mb: 0.5 }}>
-                SALEM, TAMIL NADU
-              </Typography>
-              <Typography variant="subtitle1" fontWeight="bold" color="secondary.light" sx={{ textTransform: 'uppercase', letterSpacing: 1, mb: 0.5 }}>
-                National Service Scheme (NSS)
-              </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.9, fontSize: '0.95rem', fontWeight: 'bold' }}>
-                Review &amp; Verify Your Quarterly Activity Report
-              </Typography>
-            </Box>
-
-            <Box
-              component="img"
-              src="/nss_logo.png"
-              alt="NSS Logo"
-              sx={{
-                height: { xs: 70, sm: 80 },
-                objectFit: 'contain',
-                bgcolor: '#fff',
-                p: 0.5,
-                borderRadius: '50%',
-                marginLeft: { xs: 0, sm: '20px' },
-                order: { xs: 2, sm: 3 }
-              }}
-            />
-          </Container>
-        </Box>
-
-        <Container maxWidth="lg">
-          <Alert severity="warning" sx={{ mb: 4, fontWeight: 'bold' }}>
-            This is a preview. Scroll to the bottom and click "Confirm & Submit" to finalize your report.
-          </Alert>
-
-          {/* Basic Info Preview */}
-          <Card sx={{ mb: 3, borderRadius: 2, boxShadow: 2 }}>
-            <CardContent sx={{ p: 3 }}>
-              <Box display="flex" alignItems="center" gap={1} mb={2.5}>
-                <School color="primary" />
-                <Typography variant="h6" fontWeight="bold" color="primary">Basic Information</Typography>
-              </Box>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={4}>
-                  <Typography variant="caption" color="text.secondary" display="block">Reporting Period</Typography>
-                  <Typography variant="body1" fontWeight="bold">{header.reportingPeriod}</Typography>
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Typography variant="caption" color="text.secondary" display="block">College Name</Typography>
-                  <Typography variant="body1" fontWeight="bold">{header.collegeName}</Typography>
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Typography variant="caption" color="text.secondary" display="block">District</Typography>
-                  <Typography variant="body1" fontWeight="bold">{header.district}</Typography>
-                </Grid>
-              </Grid>
-            </CardContent>
-          </Card>
-
-          {/* Programme Officer Preview */}
-          <Card sx={{ mb: 3, borderRadius: 2, boxShadow: 2 }}>
-            <CardContent sx={{ p: 3 }}>
-              <Box display="flex" alignItems="center" gap={1} mb={2.5}>
-                <Person color="primary" />
-                <Typography variant="h6" fontWeight="bold" color="primary">Programme Officer Details</Typography>
-              </Box>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={4}>
-                  <Typography variant="caption" color="text.secondary" display="block">Name</Typography>
-                  <Typography variant="body1" fontWeight="bold">{header.programmeOfficerName}</Typography>
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Typography variant="caption" color="text.secondary" display="block">Mobile Number</Typography>
-                  <Typography variant="body1" fontWeight="bold">{header.programmeOfficerMobile}</Typography>
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Typography variant="caption" color="text.secondary" display="block">Email Address</Typography>
-                  <Typography variant="body1" fontWeight="bold">{header.programmeOfficerEmail}</Typography>
-                </Grid>
-              </Grid>
-            </CardContent>
-          </Card>
-
-          {/* Activities Preview */}
-          <Card sx={{ mb: 3, borderRadius: 2, boxShadow: 2 }}>
-            <CardContent sx={{ p: 3 }}>
-              <Box display="flex" alignItems="center" gap={1} mb={3}>
-                <Campaign color="primary" />
-                <Typography variant="h6" fontWeight="bold" color="primary">Activity-wise Performance</Typography>
-              </Box>
-
-              <Stack spacing={2.5}>
-                {ACTIVITIES_META.map((act, idx) => {
-                  const state = activities[act.name];
-                  return (
-                    <Paper key={act.name} variant="outlined" sx={{ p: 2.5, borderRadius: 2, bgcolor: idx % 2 === 0 ? '#fafbff' : '#fff' }}>
-                      <Typography variant="subtitle1" fontWeight="bold" color="primary.dark" sx={{ mb: 1.5 }}>
-                        {idx + 1}. {act.name}
-                      </Typography>
-                      <Grid container spacing={2}>
-                        {act.fields.map(f => {
-                          const val = state[f.key];
-                          return (
-                            <Grid item xs={12} sm={act.fields.length > 3 ? 3 : 4} key={f.key}>
-                              <Typography variant="caption" color="text.secondary" display="block">
-                                {f.label.replace(' *', '').replace(' (optional)', '')}
-                              </Typography>
-                              <Typography variant="body2" fontWeight={600}>
-                                {val === '' || val === undefined || val === null ? '—' : val}
-                              </Typography>
-                            </Grid>
-                          );
-                        })}
-                      </Grid>
-                    </Paper>
-                  );
-                })}
-              </Stack>
-            </CardContent>
-          </Card>
-
-          {/* Social Media Preview */}
-          <Card sx={{ mb: 4, borderRadius: 2, boxShadow: 2 }}>
-            <CardContent sx={{ p: 3 }}>
-              <Box display="flex" alignItems="center" gap={1} mb={2.5}>
-                <Share color="primary" />
-                <Typography variant="h6" fontWeight="bold" color="primary">Social Media Presence</Typography>
-              </Box>
-              <Grid container spacing={2}>
-                {[
-                  { key: 'instagram', label: 'Instagram' },
-                  { key: 'facebook', label: 'Facebook' },
-                  { key: 'youtube', label: 'YouTube' },
-                  { key: 'x', label: 'X (Twitter)' },
-                  { key: 'other', label: 'Other Social' }
-                ].map(({ key, label }) => (
-                  <Grid item xs={12} sm={4} key={key}>
-                    <Typography variant="caption" color="text.secondary" display="block">{label}</Typography>
-                    <Typography variant="body2" fontWeight={600}>{socialMedia[key] || '—'}</Typography>
-                  </Grid>
-                ))}
-              </Grid>
-            </CardContent>
-          </Card>
-
-          {/* Actions */}
-          <Box display="flex" justifyContent="center" gap={3}>
-            <Button
-              variant="outlined"
-              size="large"
-              onClick={() => {
-                setShowPreview(false);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              startIcon={<ArrowBack />}
-              sx={{ px: 4, py: 1.5, fontWeight: 'bold' }}
-            >
-              Back to Edit
-            </Button>
-            <Button
-              variant="contained"
-              size="large"
-              disabled={submitting}
-              onClick={handleFinalSubmit}
-              startIcon={submitting ? <CircularProgress size={20} color="inherit" /> : <Send />}
-              sx={{
-                px: 5, py: 1.5, fontWeight: 'bold',
-                background: 'linear-gradient(135deg, #2e7d32, #4caf50)',
-                '&:hover': { background: 'linear-gradient(135deg, #1b5e20, #388e3c)' }
-              }}
-            >
-              {submitting ? 'Submitting...' : 'Confirm & Submit'}
-            </Button>
-          </Box>
-        </Container>
-      </Box>
-    );
-  }
 
   return (
     <Box sx={{ bgcolor: '#f5f7fa', minHeight: '100vh', pb: 8 }}>
@@ -864,6 +650,248 @@ export default function ReportForm() {
 
         </Box>
       </Container>
+
+      <Dialog
+        open={showPreview}
+        onClose={() => setShowPreview(false)}
+        fullWidth
+        maxWidth="lg"
+        scroll="body"
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            overflow: 'hidden'
+          }
+        }}
+      >
+        <DialogTitle sx={{ p: 0, position: 'relative' }}>
+          <IconButton
+            onClick={() => setShowPreview(false)}
+            aria-label="close"
+            sx={{
+              position: 'absolute',
+              right: 16,
+              top: 16,
+              color: '#fff',
+              zIndex: 10,
+              bgcolor: 'rgba(255, 255, 255, 0.15)',
+              '&:hover': {
+                bgcolor: 'rgba(255, 255, 255, 0.3)',
+              }
+            }}
+          >
+            <Close />
+          </IconButton>
+
+          <Box sx={{ background: 'linear-gradient(135deg, #002f6c 0%, #004aad 100%)', color: '#fff', py: 3, px: 3, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <Container sx={{
+              mx: 'auto',
+              display: 'flex',
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              justifyContent: 'center',
+              gap: { xs: 2, sm: 0 },
+              alignItems: 'center',
+              width: '100%',
+              border: '2px solid #fff',
+              p: 2,
+              pr: { xs: 2, sm: 8 }
+            }}>
+              <Box
+                component="img"
+                src="/periyar_logo.png"
+                alt="Periyar University Logo"
+                sx={{
+                  height: { xs: 70, sm: 80 },
+                  objectFit: 'contain',
+                  bgcolor: '#fff',
+                  p: 0.5,
+                  borderRadius: '50%',
+                  marginRight: { xs: 0, sm: '20px' },
+                  order: { xs: 1, sm: 1 }
+                }}
+              />
+
+              <Box sx={{
+                width: { xs: '100%', sm: 'auto' },
+                order: { xs: 3, sm: 2 },
+                textAlign: 'center',
+                mt: { xs: 2, sm: 0 }
+              }}>
+                <Typography variant="h5" fontWeight="bold" letterSpacing={0.5} gutterBottom>
+                  PERIYAR UNIVERSITY
+                </Typography>
+                <Typography variant="caption" display="block" sx={{ opacity: 0.85, fontSize: '0.85rem', fontWeight: 600, mt: -0.5, mb: 0.5 }}>
+                  SALEM, TAMIL NADU
+                </Typography>
+                <Typography variant="subtitle1" fontWeight="bold" color="secondary.light" sx={{ textTransform: 'uppercase', letterSpacing: 1, mb: 0.5 }}>
+                  National Service Scheme (NSS)
+                </Typography>
+                <Typography variant="body2" sx={{ opacity: 0.9, fontSize: '0.95rem', fontWeight: 'bold' }}>
+                  Review &amp; Verify Your Quarterly Activity Report
+                </Typography>
+              </Box>
+
+              <Box
+                component="img"
+                src="/nss_logo.png"
+                alt="NSS Logo"
+                sx={{
+                  height: { xs: 70, sm: 80 },
+                  objectFit: 'contain',
+                  bgcolor: '#fff',
+                  p: 0.5,
+                  borderRadius: '50%',
+                  marginLeft: { xs: 0, sm: '20px' },
+                  order: { xs: 2, sm: 3 }
+                }}
+              />
+            </Container>
+          </Box>
+        </DialogTitle>
+
+        <DialogContent sx={{ bgcolor: '#f5f7fa', p: { xs: 2, sm: 3 } }}>
+          <Alert severity="warning" sx={{ my: 2, fontWeight: 'bold' }}>
+            This is a preview. Review details below and click "Confirm & Submit" to finalize your report.
+          </Alert>
+
+          {/* Basic Info Preview */}
+          <Card sx={{ mb: 3, borderRadius: 2, boxShadow: 2 }}>
+            <CardContent sx={{ p: 3 }}>
+              <Box display="flex" alignItems="center" gap={1} mb={2.5}>
+                <School color="primary" />
+                <Typography variant="h6" fontWeight="bold" color="primary">Basic Information</Typography>
+              </Box>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={4}>
+                  <Typography variant="caption" color="text.secondary" display="block">Reporting Period</Typography>
+                  <Typography variant="body1" fontWeight="bold">{header.reportingPeriod}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Typography variant="caption" color="text.secondary" display="block">College Name</Typography>
+                  <Typography variant="body1" fontWeight="bold">{header.collegeName}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Typography variant="caption" color="text.secondary" display="block">District</Typography>
+                  <Typography variant="body1" fontWeight="bold">{header.district}</Typography>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+
+          {/* Programme Officer Preview */}
+          <Card sx={{ mb: 3, borderRadius: 2, boxShadow: 2 }}>
+            <CardContent sx={{ p: 3 }}>
+              <Box display="flex" alignItems="center" gap={1} mb={2.5}>
+                <Person color="primary" />
+                <Typography variant="h6" fontWeight="bold" color="primary">Programme Officer Details</Typography>
+              </Box>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={4}>
+                  <Typography variant="caption" color="text.secondary" display="block">Name</Typography>
+                  <Typography variant="body1" fontWeight="bold">{header.programmeOfficerName}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Typography variant="caption" color="text.secondary" display="block">Mobile Number</Typography>
+                  <Typography variant="body1" fontWeight="bold">{header.programmeOfficerMobile}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Typography variant="caption" color="text.secondary" display="block">Email Address</Typography>
+                  <Typography variant="body1" fontWeight="bold">{header.programmeOfficerEmail}</Typography>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+
+          {/* Activities Preview */}
+          <Card sx={{ mb: 3, borderRadius: 2, boxShadow: 2 }}>
+            <CardContent sx={{ p: 3 }}>
+              <Box display="flex" alignItems="center" gap={1} mb={3}>
+                <Campaign color="primary" />
+                <Typography variant="h6" fontWeight="bold" color="primary">Activity-wise Performance</Typography>
+              </Box>
+
+              <Stack spacing={2.5}>
+                {ACTIVITIES_META.map((act, idx) => {
+                  const state = activities[act.name];
+                  return (
+                    <Paper key={act.name} variant="outlined" sx={{ p: 2.5, borderRadius: 2, bgcolor: idx % 2 === 0 ? '#fafbff' : '#fff' }}>
+                      <Typography variant="subtitle1" fontWeight="bold" color="primary.dark" sx={{ mb: 1.5 }}>
+                        {idx + 1}. {act.name}
+                      </Typography>
+                      <Grid container spacing={2}>
+                        {act.fields.map(f => {
+                          const val = state[f.key];
+                          return (
+                            <Grid item xs={12} sm={act.fields.length > 3 ? 3 : 4} key={f.key}>
+                              <Typography variant="caption" color="text.secondary" display="block">
+                                {f.label.replace(' *', '').replace(' (optional)', '')}
+                              </Typography>
+                              <Typography variant="body2" fontWeight={600}>
+                                {val === '' || val === undefined || val === null ? '—' : val}
+                              </Typography>
+                            </Grid>
+                          );
+                        })}
+                      </Grid>
+                    </Paper>
+                  );
+                })}
+              </Stack>
+            </CardContent>
+          </Card>
+
+          {/* Social Media Preview */}
+          <Card sx={{ mb: 4, borderRadius: 2, boxShadow: 2 }}>
+            <CardContent sx={{ p: 3 }}>
+              <Box display="flex" alignItems="center" gap={1} mb={2.5}>
+                <Share color="primary" />
+                <Typography variant="h6" fontWeight="bold" color="primary">Social Media Presence</Typography>
+              </Box>
+              <Grid container spacing={2}>
+                {[
+                  { key: 'instagram', label: 'Instagram' },
+                  { key: 'facebook', label: 'Facebook' },
+                  { key: 'youtube', label: 'YouTube' },
+                  { key: 'x', label: 'X (Twitter)' },
+                  { key: 'other', label: 'Other Social' }
+                ].map(({ key, label }) => (
+                  <Grid item xs={12} sm={4} key={key}>
+                    <Typography variant="caption" color="text.secondary" display="block">{label}</Typography>
+                    <Typography variant="body2" fontWeight={600}>{socialMedia[key] || '—'}</Typography>
+                  </Grid>
+                ))}
+              </Grid>
+            </CardContent>
+          </Card>
+        </DialogContent>
+
+        <DialogActions sx={{ bgcolor: '#f5f7fa', px: 3, pb: 3, justifyContent: 'center', gap: 3 }}>
+          <Button
+            variant="outlined"
+            size="large"
+            onClick={() => setShowPreview(false)}
+            startIcon={<ArrowBack />}
+            sx={{ px: 4, py: 1.5, fontWeight: 'bold' }}
+          >
+            Back to Edit
+          </Button>
+          <Button
+            variant="contained"
+            size="large"
+            disabled={submitting}
+            onClick={handleFinalSubmit}
+            startIcon={submitting ? <CircularProgress size={20} color="inherit" /> : <Send />}
+            sx={{
+              px: 5, py: 1.5, fontWeight: 'bold',
+              background: 'linear-gradient(135deg, #2e7d32, #4caf50)',
+              '&:hover': { background: 'linear-gradient(135deg, #1b5e20, #388e3c)' }
+            }}
+          >
+            {submitting ? 'Submitting...' : 'Confirm & Submit'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
