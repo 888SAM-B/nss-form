@@ -13,7 +13,8 @@ const {
   exportOfficialExcel,
   exportRawExcel,
   exportMultiSheetExcel,
-  exportBulkPDF
+  exportBulkPDF,
+  exportCumulativePDF
 } = require('../controllers/exportController');
 
 // Public: submit a new report (plain JSON)
@@ -23,6 +24,7 @@ router.post('/', submitReport);
 router.get('/export/raw', protect, adminOnly, exportRawExcel);
 router.get('/export/multi-sheet', protect, adminOnly, exportMultiSheetExcel);
 router.get('/export/bulk-pdf', protect, adminOnly, exportBulkPDF);
+router.get('/export/cumulative-pdf', protect, adminOnly, exportCumulativePDF);
 
 // Admin-only: list reports with filters
 router.get('/', protect, adminOnly, getReports);

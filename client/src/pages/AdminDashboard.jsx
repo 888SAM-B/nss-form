@@ -6,7 +6,8 @@ import {
   Card, CardContent, Grid, CircularProgress, Table, TableBody,
   TableCell, TableContainer, TableHead, TableRow, Paper, IconButton,
   TextField, MenuItem, Select, FormControl, InputLabel, Chip,
-  Stack, Tooltip, Alert, InputAdornment
+  Stack, Tooltip, Alert, InputAdornment, Dialog, DialogTitle,
+  DialogContent, DialogActions
 } from '@mui/material';
 import {
   ExitToApp, Visibility, Delete, PictureAsPdf, GridOn,
@@ -49,6 +50,225 @@ export default function AdminDashboard() {
 
   // Download state (tracks which report is currently downloading)
   const [downloadingId, setDownloadingId] = useState(null);
+
+  // Cumulative dashboard states
+  const [showDashboard, setShowDashboard] = useState(true);
+  const [cellDialogOpen, setCellDialogOpen] = useState(false);
+  const [selectedCellActivity, setSelectedCellActivity] = useState('');
+  const [selectedCellMetric, setSelectedCellMetric] = useState('');
+  const [selectedCellContributors, setSelectedCellContributors] = useState([]);
+
+  const handleCellClick = (activity, metric, contributors) => {
+    setSelectedCellActivity(activity);
+    setSelectedCellMetric(metric);
+    setSelectedCellContributors(contributors || []);
+    setCellDialogOpen(true);
+  };
+
+  const { stats, socialCounts } = React.useMemo(() => {
+    const parseProgCount = (val) => {
+      if (!val) return 0;
+      if (typeof val === 'number') return val;
+      const match = String(val).match(/\d+/);
+      return match ? parseInt(match[0], 10) : 0;
+    };
+
+    const initActivityStats = () => ({
+      progs: { total: 0, list: [] },
+      colleges: { total: 0, list: [] },
+      volunteers: { total: 0, list: [] },
+      beneficiaries: { total: 0, list: [] }
+    });
+
+    const currentStats = {
+      specialCamps: initActivityStats(),
+      bloodDonation: initActivityStats(),
+      healthCamps: initActivityStats(),
+      antiDrug: initActivityStats(),
+      votersSIR: initActivityStats(),
+      votersSVEEP: initActivityStats(),
+      roadSafety: initActivityStats(),
+      treePlantation: initActivityStats(),
+      importantDays: initActivityStats(),
+      pledge: initActivityStats(),
+      rallies: initActivityStats(),
+      hostedMeetings: initActivityStats(),
+      anyOther: initActivityStats()
+    };
+
+    const currentSocialCounts = {
+      instagram: { total: 0, list: [] },
+      x: { total: 0, list: [] },
+      facebook: { total: 0, list: [] },
+      youtube: { total: 0, list: [] },
+      other: { total: 0, list: [] }
+    };
+
+    const isValidSocialLink = (url) => {
+      if (!url) return false;
+      const clean = url.trim().toLowerCase();
+      if (!clean) return false;
+      if (
+        clean === 'nil' ||
+        clean === '-' ||
+        clean === 'none' ||
+        clean === 'no' ||
+        clean === 'na' ||
+        clean === 'n/a' ||
+        clean === 'nil.' ||
+        clean === 'Ni.' ||
+        clean === 'ni.' ||
+        clean === 'not submitted' ||
+        clean === 'not active' ||
+        clean === 'not link' ||
+        clean === 'no link'
+      ) {
+        return false;
+      }
+      return true;
+    };
+
+    reports.forEach(report => {
+      const acts = report.activities || [];
+      const sm = report.socialMedia || {};
+      const contributorBase = {
+        reportId: report._id,
+        collegeName: report.collegeName,
+        poName: report.programmeOfficerName,
+        district: report.district,
+        submittedAt: report.submittedAt
+      };
+
+      // 1. Calculate Social Media
+      if (sm.instagram && isValidSocialLink(sm.instagram)) {
+        currentSocialCounts.instagram.total += 1;
+        currentSocialCounts.instagram.list.push({ ...contributorBase, value: sm.instagram, label: sm.instagram });
+      }
+      if (sm.facebook && isValidSocialLink(sm.facebook)) {
+        currentSocialCounts.facebook.total += 1;
+        currentSocialCounts.facebook.list.push({ ...contributorBase, value: sm.facebook, label: sm.facebook });
+      }
+      if (sm.youtube && isValidSocialLink(sm.youtube)) {
+        currentSocialCounts.youtube.total += 1;
+        currentSocialCounts.youtube.list.push({ ...contributorBase, value: sm.youtube, label: sm.youtube });
+      }
+      if (sm.x && isValidSocialLink(sm.x)) {
+        currentSocialCounts.x.total += 1;
+        currentSocialCounts.x.list.push({ ...contributorBase, value: sm.x, label: sm.x });
+      }
+      if (sm.other && isValidSocialLink(sm.other)) {
+        currentSocialCounts.other.total += 1;
+        currentSocialCounts.other.list.push({ ...contributorBase, value: sm.other, label: sm.other });
+      }
+
+      // 2. Calculate Activities
+      acts.forEach(act => {
+        const name = act.activityName;
+        let key = null;
+        let pCount = parseProgCount(act.programmeName);
+        let vCount = act.volunteersCount || 0;
+        let bCount = 0;
+
+        switch (name) {
+          case 'Blood Donation Camps':
+            key = 'bloodDonation';
+            bCount = act.bloodUnitsDonated || 0;
+            break;
+          case 'Health Camps':
+            key = 'healthCamps';
+            bCount = act.beneficiariesCount || 0;
+            break;
+          case 'Anti Drug Camps':
+            key = 'antiDrug';
+            bCount = act.beneficiariesCount || 0;
+            break;
+          case 'Voters Awareness SIR':
+            key = 'votersSIR';
+            bCount = act.beneficiariesCount || 0;
+            break;
+          case 'Voters Awareness SVEEP':
+            key = 'votersSVEEP';
+            bCount = act.beneficiariesCount || 0;
+            break;
+          case 'Road Safety':
+            key = 'roadSafety';
+            bCount = act.beneficiariesCount || 0;
+            break;
+          case 'Tree Plantation':
+            key = 'treePlantation';
+            bCount = act.saplingsPlanted || 0;
+            break;
+          case 'Important Days & Events':
+            key = 'importantDays';
+            bCount = 0;
+            break;
+          case 'Pledge':
+            key = 'pledge';
+            bCount = 0;
+            break;
+          case 'Rallies':
+            key = 'rallies';
+            bCount = act.distanceKm || 0;
+            break;
+          case 'Hosted Meetings':
+            key = 'hostedMeetings';
+            bCount = act.beneficiariesCount || 0;
+            break;
+          case 'Any Other':
+            key = 'anyOther';
+            pCount = act.programmesConducted || 0;
+            vCount = act.volunteersParticipated || 0;
+            bCount = act.beneficiaries || 0;
+            break;
+        }
+
+        if (key) {
+          const target = currentStats[key];
+
+          // a. Programmes
+          if (pCount > 0) {
+            target.progs.total += pCount;
+            target.progs.list.push({ ...contributorBase, value: pCount, label: `${pCount} Programmes` });
+          }
+
+          // b. Volunteers
+          if (vCount > 0) {
+            target.volunteers.total += vCount;
+            target.volunteers.list.push({ ...contributorBase, value: vCount, label: `${vCount} Volunteers` });
+          }
+
+          // c. Beneficiaries
+          if (bCount > 0) {
+            target.beneficiaries.total += bCount;
+            let suffix = 'Beneficiaries';
+            if (key === 'bloodDonation') suffix = 'Units of Blood';
+            if (key === 'treePlantation') suffix = 'Saplings Planted';
+            if (key === 'rallies') suffix = 'KM Distance';
+            target.beneficiaries.list.push({ ...contributorBase, value: bCount, label: `${bCount} ${suffix}` });
+          }
+
+          // d. College participation
+          if (key !== 'anyOther') {
+            if (pCount > 0 || vCount > 0 || bCount > 0) {
+              target.colleges.total += 1;
+              target.colleges.list.push({ ...contributorBase, value: 1, label: 'Participated' });
+            }
+          } else {
+            const cCount = act.collegeParticipated || 0;
+            if (cCount > 0) {
+              target.colleges.total += cCount;
+              target.colleges.list.push({ ...contributorBase, value: cCount, label: `${cCount} Colleges` });
+            } else if (pCount > 0 || vCount > 0 || bCount > 0) {
+              target.colleges.total += 1;
+              target.colleges.list.push({ ...contributorBase, value: 1, label: '1 College' });
+            }
+          }
+        }
+      });
+    });
+
+    return { stats: currentStats, socialCounts: currentSocialCounts };
+  }, [reports]);
 
   const handleDownload = async (id, type, collegeName, period) => {
     const key = `${id}-${type}`;
@@ -120,6 +340,113 @@ export default function AdminDashboard() {
     setFilterSubmissionId('');
     setFilterSubmissionDate('');
     setSort('newest');
+  };
+
+  const getActivityName = (activityKey) => {
+    if (activityKey === 'social') return 'Social Media';
+    switch (activityKey) {
+      case 'specialCamps': return 'Special Camps Conducted';
+      case 'bloodDonation': return 'Blood Donation Camps';
+      case 'healthCamps': return 'No of Health Camps';
+      case 'antiDrug': return 'Anti drug Camps';
+      case 'votersSIR': return 'Voters Awareness (SIR)';
+      case 'votersSVEEP': return 'Voters Awareness (SVEEP)';
+      case 'roadSafety': return 'Road Safety';
+      case 'treePlantation': return 'Tree Plantation';
+      case 'importantDays': return 'Important Days & Events';
+      case 'pledge': return 'Pledge';
+      case 'rallies': return 'Rallies';
+      case 'hostedMeetings': return 'Hosted Meetings';
+      case 'anyOther': return 'Any Other';
+      default: return activityKey;
+    }
+  };
+
+  const getMetricName = (metricType) => {
+    if (selectedCellActivity === 'social') {
+      switch (metricType) {
+        case 'instagram': return 'Instagram';
+        case 'x': return 'X (Twitter)';
+        case 'facebook': return 'Meta (Facebook)';
+        case 'youtube': return 'YouTube';
+        case 'other': return 'Other Platforms';
+        default: return metricType;
+      }
+    }
+    switch (metricType) {
+      case 'progs': return 'Programmes Conducted';
+      case 'colleges': return 'Colleges Participated';
+      case 'volunteers': return 'NSS Volunteers';
+      case 'beneficiaries': return 'Beneficiaries/Saplings/Units';
+      default: return metricType;
+    }
+  };
+
+  const renderTableCell = (activityKey, metricType, showBorderRight = true) => {
+    const data = stats[activityKey]?.[metricType];
+    const total = data?.total || 0;
+    const isClickable = total > 0;
+
+    return (
+      <TableCell
+        align="center"
+        onClick={isClickable ? () => handleCellClick(activityKey, metricType, data.list) : undefined}
+        sx={{
+          p: 1.5,
+          fontSize: '0.75rem',
+          borderRight: showBorderRight ? '1px solid #e0e0e0' : 'none',
+          cursor: isClickable ? 'pointer' : 'default',
+          transition: 'background-color 0.15s ease',
+          ...(isClickable ? {
+            fontWeight: 'bold',
+            color: '#004aad',
+            '&:hover': {
+              bgcolor: '#e3f2fd', // Soft blue hover color for the entire cell
+            }
+          } : {
+            color: 'text.secondary'
+          })
+        }}
+      >
+        {isClickable ? (
+          <Tooltip title="Click to view details" arrow>
+            <Typography variant="body2" component="span" sx={{ fontWeight: 'bold', fontSize: '0.78rem' }}>
+              {total}
+            </Typography>
+          </Tooltip>
+        ) : (
+          total
+        )}
+      </TableCell>
+    );
+  };
+
+  const renderSocialText = (platformKey) => {
+    const data = socialCounts[platformKey];
+    const total = data?.total || 0;
+    if (total === 0) return <Typography component="span" variant="body2" color="text.secondary" sx={{ mx: 0.5 }}>0</Typography>;
+
+    return (
+      <Tooltip title={`Click to view ${getMetricName(platformKey)} posts`} arrow>
+        <Typography
+          component="span"
+          variant="body2"
+          onClick={() => handleCellClick('social', platformKey, data.list)}
+          sx={{
+            mx: 0.5,
+            fontWeight: 'bold',
+            color: '#1b4ed9ff',
+            cursor: 'pointer',
+
+            '&:hover': {
+              color: '#1b4ed9ff'
+            }
+          }}
+        >
+          {total}
+        </Typography>
+      </Tooltip>
+    );
   };
 
   // Stats
@@ -262,6 +589,33 @@ export default function AdminDashboard() {
                   >
                     PDF
                   </Button>
+                  <Button
+                    variant="contained"
+                    color="warning"
+                    size="small"
+                    startIcon={downloadingId === 'cumulative-pdf' ? <CircularProgress size={14} color="inherit" /> : <DownloadForOffline />}
+                    disabled={downloadingId !== null}
+                    onClick={async () => {
+                      setDownloadingId('cumulative-pdf');
+                      try {
+                        const params = new URLSearchParams();
+                        if (filterPeriod) params.set('reportingPeriod', filterPeriod);
+                        if (filterDistrict) params.set('district', filterDistrict);
+                        if (filterSubmissionId) params.set('submissionId', filterSubmissionId);
+                        if (filterSubmissionDate) params.set('submissionDate', filterSubmissionDate);
+                        await downloadFile(
+                          `/api/reports/export/cumulative-pdf?${params.toString()}`,
+                          'NSS_Eventwise_Cumulative_Report.pdf'
+                        );
+                      } catch (err) {
+                        toast.error(err.message);
+                      } finally {
+                        setDownloadingId(null);
+                      }
+                    }}
+                  >
+                    Cumulative PDF
+                  </Button>
                 </Stack>
               </CardContent>
             </Card>
@@ -400,6 +754,168 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
+        {/* Event-wise Cumulative Dashboard */}
+        <Card sx={{ mb: 4, borderRadius: 2, boxShadow: 3, border: '1px solid #e0e0e0', overflow: 'hidden' }}>
+          <Box sx={{ bgcolor: '#f8fafc', px: 3, py: 2, borderBottom: '1px solid #e0e0e0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box display="flex" alignItems="center" gap={1.5}>
+              <Typography variant="h6" fontWeight="bold" color="primary" sx={{ m: 0 }}>
+                Event-wise Cumulative Dashboard (Real-time)
+              </Typography>
+              <Chip label="Interactive Grid" color="primary" size="small" variant="filled" sx={{ fontWeight: 'bold', height: 20, fontSize: '0.65rem' }} />
+            </Box>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => setShowDashboard(!showDashboard)}
+              sx={{ textTransform: 'none', fontWeight: 'bold' }}
+            >
+              {showDashboard ? 'Hide Dashboard' : 'Show Dashboard'}
+            </Button>
+          </Box>
+
+          {showDashboard && (
+            <CardContent sx={{ p: 0 }}>
+              <TableContainer component={Paper} sx={{ maxHeight: 600, overflowX: 'auto', borderRadius: 0, boxShadow: 'none' }}>
+                <Table size="small" stickyHeader sx={{ borderCollapse: 'separate' }}>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell rowSpan={2} sx={{ bgcolor: '#002f6c', color: '#fff', fontWeight: 'bold', textAlign: 'center', fontSize: '0.75rem', p: 1, borderRight: '1px solid rgba(224, 224, 224, 0.2)' }}>S.No</TableCell>
+                      <TableCell rowSpan={2} sx={{ bgcolor: '#002f6c', color: '#fff', fontWeight: 'bold', minWidth: 220, fontSize: '0.75rem', p: 1, borderRight: '1px solid rgba(224, 224, 224, 0.2)' }}>Subject</TableCell>
+                      <TableCell rowSpan={2} sx={{ bgcolor: '#002f6c', color: '#fff', fontWeight: 'bold', textAlign: 'center', minWidth: 100, fontSize: '0.75rem', p: 1, borderRight: '1px solid rgba(224, 224, 224, 0.2)' }}>Special Camps Conducted</TableCell>
+                      <TableCell rowSpan={2} sx={{ bgcolor: '#002f6c', color: '#fff', fontWeight: 'bold', textAlign: 'center', minWidth: 100, fontSize: '0.75rem', p: 1, borderRight: '1px solid rgba(224, 224, 224, 0.2)' }}>Blood Donation Camps</TableCell>
+                      <TableCell rowSpan={2} sx={{ bgcolor: '#002f6c', color: '#fff', fontWeight: 'bold', textAlign: 'center', minWidth: 100, fontSize: '0.75rem', p: 1, borderRight: '1px solid rgba(224, 224, 224, 0.2)' }}>No of Health Camps</TableCell>
+                      <TableCell rowSpan={2} sx={{ bgcolor: '#002f6c', color: '#fff', fontWeight: 'bold', textAlign: 'center', minWidth: 100, fontSize: '0.75rem', p: 1, borderRight: '1px solid rgba(224, 224, 224, 0.2)' }}>Anti Drug Camps</TableCell>
+                      <TableCell colSpan={2} sx={{ bgcolor: '#002f6c', color: '#fff', fontWeight: 'bold', textAlign: 'center', fontSize: '0.75rem', p: 1, borderRight: '1px solid rgba(224, 224, 224, 0.2)' }}>Voters Awareness</TableCell>
+                      <TableCell rowSpan={2} sx={{ bgcolor: '#002f6c', color: '#fff', fontWeight: 'bold', textAlign: 'center', minWidth: 100, fontSize: '0.75rem', p: 1, borderRight: '1px solid rgba(224, 224, 224, 0.2)' }}>Road Safety</TableCell>
+                      <TableCell rowSpan={2} sx={{ bgcolor: '#002f6c', color: '#fff', fontWeight: 'bold', textAlign: 'center', minWidth: 100, fontSize: '0.75rem', p: 1, borderRight: '1px solid rgba(224, 224, 224, 0.2)' }}>Tree Plantation</TableCell>
+                      <TableCell rowSpan={2} sx={{ bgcolor: '#002f6c', color: '#fff', fontWeight: 'bold', textAlign: 'center', minWidth: 120, fontSize: '0.75rem', p: 1, borderRight: '1px solid rgba(224, 224, 224, 0.2)' }}>Important Days & Events</TableCell>
+                      <TableCell rowSpan={2} sx={{ bgcolor: '#002f6c', color: '#fff', fontWeight: 'bold', textAlign: 'center', minWidth: 100, fontSize: '0.75rem', p: 1, borderRight: '1px solid rgba(224, 224, 224, 0.2)' }}>Pledge</TableCell>
+                      <TableCell rowSpan={2} sx={{ bgcolor: '#002f6c', color: '#fff', fontWeight: 'bold', textAlign: 'center', minWidth: 100, fontSize: '0.75rem', p: 1, borderRight: '1px solid rgba(224, 224, 224, 0.2)' }}>Rallies</TableCell>
+                      <TableCell rowSpan={2} sx={{ bgcolor: '#002f6c', color: '#fff', fontWeight: 'bold', textAlign: 'center', minWidth: 100, fontSize: '0.75rem', p: 1, borderRight: '1px solid rgba(224, 224, 224, 0.2)' }}>Hosted Meetings</TableCell>
+                      <TableCell rowSpan={2} sx={{ bgcolor: '#002f6c', color: '#fff', fontWeight: 'bold', textAlign: 'center', minWidth: 100, fontSize: '0.75rem', p: 1 }}>Any Other</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell sx={{ bgcolor: '#002f6c', color: '#fff', fontWeight: 'bold', textAlign: 'center', fontSize: '0.7rem', p: 0.5, borderRight: '1px solid rgba(224, 224, 224, 0.2)' }}>SIR</TableCell>
+                      <TableCell sx={{ bgcolor: '#002f6c', color: '#fff', fontWeight: 'bold', textAlign: 'center', fontSize: '0.7rem', p: 0.5, borderRight: '1px solid rgba(224, 224, 224, 0.2)' }}>SVEEP</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {/* Row 1 */}
+                    <TableRow hover>
+                      <TableCell sx={{ fontWeight: 'bold', textAlign: 'center', fontSize: '0.75rem', p: 1, borderRight: '1px solid #e0e0e0' }}>1</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', fontSize: '0.75rem', p: 1, borderRight: '1px solid #e0e0e0' }}>No. Of Programmes Conducted</TableCell>
+                      {renderTableCell('specialCamps', 'progs')}
+                      {renderTableCell('bloodDonation', 'progs')}
+                      {renderTableCell('healthCamps', 'progs')}
+                      {renderTableCell('antiDrug', 'progs')}
+                      {renderTableCell('votersSIR', 'progs')}
+                      {renderTableCell('votersSVEEP', 'progs')}
+                      {renderTableCell('roadSafety', 'progs')}
+                      {renderTableCell('treePlantation', 'progs')}
+                      {renderTableCell('importantDays', 'progs')}
+                      {renderTableCell('pledge', 'progs')}
+                      {renderTableCell('rallies', 'progs')}
+                      {renderTableCell('hostedMeetings', 'progs')}
+                      {renderTableCell('anyOther', 'progs', false)}
+                    </TableRow>
+
+                    {/* Row 2 */}
+                    <TableRow hover>
+                      <TableCell sx={{ fontWeight: 'bold', textAlign: 'center', fontSize: '0.75rem', p: 1, borderRight: '1px solid #e0e0e0' }}>2</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', fontSize: '0.75rem', p: 1, borderRight: '1px solid #e0e0e0' }}>No of College Participated</TableCell>
+                      {renderTableCell('specialCamps', 'colleges')}
+                      {renderTableCell('bloodDonation', 'colleges')}
+                      {renderTableCell('healthCamps', 'colleges')}
+                      {renderTableCell('antiDrug', 'colleges')}
+                      {renderTableCell('votersSIR', 'colleges')}
+                      {renderTableCell('votersSVEEP', 'colleges')}
+                      {renderTableCell('roadSafety', 'colleges')}
+                      {renderTableCell('treePlantation', 'colleges')}
+                      {renderTableCell('importantDays', 'colleges')}
+                      {renderTableCell('pledge', 'colleges')}
+                      {renderTableCell('rallies', 'colleges')}
+                      {renderTableCell('hostedMeetings', 'colleges')}
+                      {renderTableCell('anyOther', 'colleges', false)}
+                    </TableRow>
+
+                    {/* Row 3 */}
+                    <TableRow hover>
+                      <TableCell sx={{ fontWeight: 'bold', textAlign: 'center', fontSize: '0.75rem', p: 1, borderRight: '1px solid #e0e0e0' }}>3</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', fontSize: '0.75rem', p: 1, borderRight: '1px solid #e0e0e0' }}>No. of NSS Volunteers Participated</TableCell>
+                      {renderTableCell('specialCamps', 'volunteers')}
+                      {renderTableCell('bloodDonation', 'volunteers')}
+                      {renderTableCell('healthCamps', 'volunteers')}
+                      {renderTableCell('antiDrug', 'volunteers')}
+                      {renderTableCell('votersSIR', 'volunteers')}
+                      {renderTableCell('votersSVEEP', 'volunteers')}
+                      {renderTableCell('roadSafety', 'volunteers')}
+                      {renderTableCell('treePlantation', 'volunteers')}
+                      {renderTableCell('importantDays', 'volunteers')}
+                      {renderTableCell('pledge', 'volunteers')}
+                      {renderTableCell('rallies', 'volunteers')}
+                      {renderTableCell('hostedMeetings', 'volunteers')}
+                      {renderTableCell('anyOther', 'volunteers', false)}
+                    </TableRow>
+
+                    {/* Row 4 */}
+                    <TableRow hover>
+                      <TableCell sx={{ fontWeight: 'bold', textAlign: 'center', fontSize: '0.75rem', p: 1, borderRight: '1px solid #e0e0e0' }}>4</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', fontSize: '0.75rem', p: 1, borderRight: '1px solid #e0e0e0' }}>No of Beneficiaries</TableCell>
+                      {renderTableCell('specialCamps', 'beneficiaries')}
+                      {renderTableCell('bloodDonation', 'beneficiaries')}
+                      {renderTableCell('healthCamps', 'beneficiaries')}
+                      {renderTableCell('antiDrug', 'beneficiaries')}
+                      {renderTableCell('votersSIR', 'beneficiaries')}
+                      {renderTableCell('votersSVEEP', 'beneficiaries')}
+                      {renderTableCell('roadSafety', 'beneficiaries')}
+                      {renderTableCell('treePlantation', 'beneficiaries')}
+                      {renderTableCell('importantDays', 'beneficiaries')}
+                      {renderTableCell('pledge', 'beneficiaries')}
+                      {renderTableCell('rallies', 'beneficiaries')}
+                      {renderTableCell('hostedMeetings', 'beneficiaries')}
+                      {renderTableCell('anyOther', 'beneficiaries', false)}
+                    </TableRow>
+
+                    {/* Row 5 */}
+                    <TableRow hover>
+                      <TableCell sx={{ fontWeight: 'bold', textAlign: 'center', fontSize: '0.75rem', p: 1, borderRight: '1px solid #e0e0e0' }}>5</TableCell>
+                      <TableCell colSpan={14} sx={{ p: 1.5 }}>
+                        <Box display="flex" alignItems="center" flexWrap="wrap" gap={2}>
+                          <Typography variant="body2" component="span" fontWeight="bold">
+                            NSS Events social media links:
+                          </Typography>
+                          <Stack direction="row" spacing={2.5} alignItems="center" flexWrap="wrap">
+                            <Box display="flex" alignItems="center">
+                              <Typography component="span" variant="body2" color="text.secondary" sx={{ mr: 0.5 }}>1. Instagram:</Typography>
+                              {renderSocialText('instagram')}
+                            </Box>
+                            <Box display="flex" alignItems="center">
+                              <Typography component="span" variant="body2" color="text.secondary" sx={{ mr: 0.5 }}>2. X (Twitter):</Typography>
+                              {renderSocialText('x')}
+                            </Box>
+                            <Box display="flex" alignItems="center">
+                              <Typography component="span" variant="body2" color="text.secondary" sx={{ mr: 0.5 }}>3. Meta (Facebook):</Typography>
+                              {renderSocialText('facebook')}
+                            </Box>
+                            <Box display="flex" alignItems="center">
+                              <Typography component="span" variant="body2" color="text.secondary" sx={{ mr: 0.5 }}>4. YouTube:</Typography>
+                              {renderSocialText('youtube')}
+                            </Box>
+                            <Box display="flex" alignItems="center">
+                              <Typography component="span" variant="body2" color="text.secondary" sx={{ mr: 0.5 }}>5. Any other:</Typography>
+                              {renderSocialText('other')}
+                            </Box>
+                          </Stack>
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </CardContent>
+          )}
+        </Card>
+
         {/* Reports Table */}
         {loading ? (
           <Box display="flex" justifyContent="center" py={8}>
@@ -516,6 +1032,89 @@ export default function AdminDashboard() {
           </TableContainer>
         )}
       </Container>
+
+      {/* Cumulative Cell Details Dialog */}
+      <Dialog
+        open={cellDialogOpen}
+        onClose={() => setCellDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+        sx={{ '& .MuiDialog-paper': { borderRadius: 2 } }}
+      >
+        <DialogTitle sx={{ bgcolor: '#002f6c', color: '#fff', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="h6" fontWeight="bold">
+            Contribution Details: {getActivityName(selectedCellActivity)} — {getMetricName(selectedCellMetric)}
+          </Typography>
+        </DialogTitle>
+        <DialogContent sx={{ p: 3, mt: 1 }}>
+          {selectedCellContributors.length === 0 ? (
+            <Alert severity="info" sx={{ mt: 1 }}>No contributions found.</Alert>
+          ) : (
+            <TableContainer component={Paper} sx={{ borderRadius: 2, border: '1px solid #e0e0e0', boxShadow: 'none', maxHeight: 450 }}>
+              <Table size="small" stickyHeader>
+                <TableHead sx={{ bgcolor: '#f5f5f5' }}>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 'bold', py: 1.5 }}>S.No</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', py: 1.5 }}>College Name</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', py: 1.5 }}>District</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', py: 1.5 }}>Programme Officer</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', py: 1.5 }}>Value Submitted</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', py: 1.5, textAlign: 'center' }}>Actions</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {selectedCellContributors.map((c, idx) => (
+                    <TableRow key={c.reportId + idx} hover>
+                      <TableCell sx={{ py: 1 }}>{idx + 1}</TableCell>
+                      <TableCell sx={{ fontWeight: 500, py: 1 }}>{c.collegeName}</TableCell>
+                      <TableCell sx={{ py: 1 }}>{c.district}</TableCell>
+                      <TableCell sx={{ py: 1 }}>{c.poName}</TableCell>
+                      <TableCell sx={{ py: 1 }}>
+                        {selectedCellActivity === 'social' ? (
+                          <a
+                            href={c.value.startsWith('http') ? c.value : `https://${c.value}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              wordBreak: 'break-all',
+                              color: '#004aad',
+                              textDecoration: 'underline',
+                              fontWeight: 'bold'
+                            }}
+                          >
+                            {c.value}
+                          </a>
+                        ) : (
+                          <Chip label={c.label} size="small" variant="filled" color="primary" sx={{ fontWeight: 'bold' }} />
+                        )}
+                      </TableCell>
+                      <TableCell sx={{ textAlign: 'center', py: 1 }}>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          startIcon={<Visibility />}
+                          onClick={() => {
+                            setCellDialogOpen(false);
+                            handleView(c.reportId);
+                          }}
+                          sx={{ textTransform: 'none', py: 0.5 }}
+                        >
+                          View Report
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ p: 2, borderTop: '1px solid #e0e0e0' }}>
+          <Button onClick={() => setCellDialogOpen(false)} variant="outlined" color="primary" sx={{ fontWeight: 'bold', textTransform: 'none' }}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Report Detail Dialog */}
       <ReportDetailDialog

@@ -1,5 +1,5 @@
 const Report = require('../models/Report');
-const { generateOfficialPDF, generateBulkPDF } = require('../services/pdfService');
+const { generateOfficialPDF, generateBulkPDF, generateCumulativePDF } = require('../services/pdfService');
 const {
   generateOfficialExcel,
   generateMultiSheetExcel,
@@ -168,10 +168,44 @@ const exportBulkPDF = async (req, res) => {
   }
 };
 
+// @desc    Export cumulative report as PDF (aggregated format)
+// @route   GET /api/reports/export/cumulative-pdf
+// @access  Private (Admin)
+const exportCumulativePDF = async (req, res) => {
+  try {
+    const { reportingPeriod, district, submissionId, submissionDate } = req.query;
+    const query = {};
+    if (reportingPeriod) query.reportingPeriod = new RegExp(reportingPeriod, 'i');
+    if (district) query.district = new RegExp(district, 'i');
+    if (submissionId) query.submissionId = new RegExp(submissionId.trim(), 'i');
+    if (submissionDate) {
+      const start = new Date(submissionDate);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(submissionDate);
+      end.setHours(23, 59, 59, 999);
+      query.submittedAt = { $gte: start, $lte: end };
+    }
+
+    const reports = await Report.find(query).sort({ submittedAt: -1 });
+    const buffer = await generateCumulativePDF(reports, req.query);
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="NSS_Eventwise_Cumulative_Report.pdf"`
+    );
+    res.send(buffer);
+  } catch (error) {
+    console.error('Cumulative PDF export error:', error);
+    res.status(500).json({ message: 'Error generating cumulative PDF: ' + error.message });
+  }
+};
+
 module.exports = {
   exportOfficialPDF,
   exportOfficialExcel,
   exportRawExcel,
   exportMultiSheetExcel,
-  exportBulkPDF
+  exportBulkPDF,
+  exportCumulativePDF
 };
