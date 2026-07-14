@@ -382,10 +382,25 @@ export default function AdminDashboard() {
     }
   };
 
+  const getUnitSuffix = (activityKey) => {
+    if (activityKey === 'bloodDonation') return ' (Units of Blood)';
+    if (activityKey === 'treePlantation') return ' (Saplings)';
+    if (activityKey === 'rallies') return ' (KMs)';
+    return '';
+  };
+
   const renderTableCell = (activityKey, metricType, showBorderRight = true) => {
     const data = stats[activityKey]?.[metricType];
     const total = data?.total || 0;
     const isClickable = total > 0;
+
+    let displayValue = total;
+    if (metricType === 'beneficiaries') {
+      const suffix = getUnitSuffix(activityKey);
+      if (suffix) {
+        displayValue = `${total}${suffix}`;
+      }
+    }
 
     return (
       <TableCell
@@ -411,11 +426,11 @@ export default function AdminDashboard() {
         {isClickable ? (
           <Tooltip title="Click to view details" arrow>
             <Typography variant="body2" component="span" sx={{ fontWeight: 'bold', fontSize: '0.78rem' }}>
-              {total}
+              {displayValue}
             </Typography>
           </Tooltip>
         ) : (
-          total
+          displayValue
         )}
       </TableCell>
     );
@@ -860,7 +875,7 @@ export default function AdminDashboard() {
                     {/* Row 4 */}
                     <TableRow hover>
                       <TableCell sx={{ fontWeight: 'bold', textAlign: 'center', fontSize: '0.75rem', p: 1, borderRight: '1px solid #e0e0e0' }}>4</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold', fontSize: '0.75rem', p: 1, borderRight: '1px solid #e0e0e0' }}>No of Beneficiaries</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', fontSize: '0.75rem', p: 1, borderRight: '1px solid #e0e0e0' }}>Beneficiaries</TableCell>
                       {renderTableCell('specialCamps', 'beneficiaries')}
                       {renderTableCell('bloodDonation', 'beneficiaries')}
                       {renderTableCell('healthCamps', 'beneficiaries')}
